@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">todo-list-v1</string>
+    <string name="app_name">Todo List</string>
+    <string name="add_task">Add task</string>
+    <string name="no_tasks_description">No Task Description!</string>
+    <string name="no_tasks_here">No tasks here. \nClick  +  to create a task.</string>
+    <string name="more_options">More Options</string>
 </resources>
