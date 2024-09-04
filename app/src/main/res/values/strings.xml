@@ -4,4 +4,12 @@
     <string name="no_tasks_description">No Task Description!</string>
     <string name="no_tasks_here">No tasks here. \nClick  +  to create a task.</string>
     <string name="more_options">More Options</string>
+    <string name="back_button">back</string>
+    <string name="task_entry_title">Add Task</string>
+    <string name="save_action">Save Task</string>
+    <string name="task_name_req">Task</string>
+    <string name="task_description_req">Description</string>
+    <string name="required_fields">Required</string>
+    <string name="task_detail_title">Task detail</string>
+    <string name="edit_task_title">Edit Task</string>
 </resources>

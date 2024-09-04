@@ -105,7 +105,7 @@ fun HomeScreen(
             taskList = homeUiState.taskList,
             onTaskClick = navigateToTaskUpdate,
             onTaskCheckedChange = { task, isChecked ->
-                // Add logic to handle checkbox state changes if needed
+                viewModel.updateTaskCompletion(task, isChecked)
             },
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,

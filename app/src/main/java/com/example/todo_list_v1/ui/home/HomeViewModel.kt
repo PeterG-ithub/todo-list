@@ -8,13 +8,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class HomeViewModel(tasksRepository: TasksRepository) : ViewModel() {
+class HomeViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
 
-    /**
-     * Holds home ui state. The list of tasks is retrieved from [TasksRepository] and mapped to
-     * [HomeUiState].
-     */
     val homeUiState: StateFlow<HomeUiState> =
         tasksRepository.getAllTasksStream()
             .map { HomeUiState(it) }
@@ -23,6 +20,13 @@ class HomeViewModel(tasksRepository: TasksRepository) : ViewModel() {
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = HomeUiState()
             )
+
+    fun updateTaskCompletion(task: Task, isCompleted: Boolean) {
+        viewModelScope.launch {
+            val updatedTask = task.copy(isCompleted = isCompleted)
+            tasksRepository.updateTask(updatedTask)
+        }
+    }
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
