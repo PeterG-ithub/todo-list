@@ -62,7 +62,10 @@ data class TaskDetails(
     val lastUpdated: Long = System.currentTimeMillis(),
     val isTracking: Boolean = false,
     val trackingStartTime: Long? = null,
-    val totalTrackingTime: Long = 0
+    val totalTrackingTime: Long = 0,
+    val expectedStartTime: Long? = null,  // Add the missing columns
+    val expectedStopTime: Long? = null,   // Add the missing columns
+    val category: String? = null          // Add the missing columns
 )
 
 /**
@@ -82,7 +85,10 @@ fun TaskDetails.toTask(): Task = Task(
     lastUpdated = lastUpdated,
     isTracking = isTracking,
     trackingStartTime = trackingStartTime,
-    totalTrackingTime = totalTrackingTime
+    totalTrackingTime = totalTrackingTime,
+    expectedStartTime = expectedStartTime,  // Add the missing fields
+    expectedStopTime = expectedStopTime,    // Add the missing fields
+    category = category
 )
 
 /**
@@ -110,5 +116,8 @@ fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     lastUpdated = lastUpdated,
     isTracking = isTracking,
     trackingStartTime = trackingStartTime,
-    totalTrackingTime = totalTrackingTime
+    totalTrackingTime = totalTrackingTime,
+    expectedStartTime = expectedStartTime,  // Add the missing fields
+    expectedStopTime = expectedStopTime,    // Add the missing fields
+    category = category
 )
