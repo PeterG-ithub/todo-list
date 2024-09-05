@@ -19,5 +19,8 @@ data class Task(
     val lastUpdated: Long = System.currentTimeMillis(), // Timestamp
     val isTracking: Boolean = false, // Whether the task is currently being tracked
     val trackingStartTime: Long? = null, // Timestamp when tracking started
-    val totalTrackingTime: Long = 0 // Total time spent on the task
+    val totalTrackingTime: Long = 0, // Total time spent on the task
+    val expectedStartTime: Long? = null, // Expected time when task is going to get started
+    val expectedStopTime: Long? = null, // Expected time when task is over
+    val category: String? = null, // Category of the task
 )
