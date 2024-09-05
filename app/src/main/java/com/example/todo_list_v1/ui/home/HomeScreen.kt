@@ -1,7 +1,6 @@
 package com.example.todo_list_v1.ui.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,11 +42,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.Task
-import com.example.todo_list_v1.ui.AppViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.data.TasksRepository
+import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.flow.Flow
@@ -163,7 +162,7 @@ private fun TaskList(
                     onTaskCheckedChange(task, isChecked)
                 },
                 modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small))
+                    .padding(dimensionResource(id = R.dimen.padding_tiny))
                     .clickable { onTaskClick(task) }
             )
         }
