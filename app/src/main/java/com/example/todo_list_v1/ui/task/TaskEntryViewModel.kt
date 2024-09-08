@@ -63,11 +63,10 @@ data class TaskDetails(
     val isTracking: Boolean = false,
     val trackingStartTime: Long? = null,
     val totalTrackingTime: Long = 0,
-    val expectedStartTime: Long? = null,  // Add the missing columns
-    val expectedStopTime: Long? = null,   // Add the missing columns
-    val category: String? = null          // Add the missing columns
+    val expectedStartTime: Long? = null,
+    val expectedStopTime: Long? = null,
+    val categoryId: Int? = null // Updated: Now categoryId instead of category
 )
-
 /**
  * Extension function to convert [TaskDetails] to [Task].
  */
@@ -86,9 +85,9 @@ fun TaskDetails.toTask(): Task = Task(
     isTracking = isTracking,
     trackingStartTime = trackingStartTime,
     totalTrackingTime = totalTrackingTime,
-    expectedStartTime = expectedStartTime,  // Add the missing fields
-    expectedStopTime = expectedStopTime,    // Add the missing fields
-    category = category
+    expectedStartTime = expectedStartTime,
+    expectedStopTime = expectedStopTime,
+    categoryId = categoryId // Updated: categoryId field instead of category
 )
 
 /**
@@ -99,9 +98,6 @@ fun Task.toTaskUiState(isEntryValid: Boolean = false): TaskUiState = TaskUiState
     isEntryValid = isEntryValid
 )
 
-/**
- * Extension function to convert [Task] to [TaskDetails]
- */
 fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     id = id,
     name = name,
@@ -117,7 +113,7 @@ fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     isTracking = isTracking,
     trackingStartTime = trackingStartTime,
     totalTrackingTime = totalTrackingTime,
-    expectedStartTime = expectedStartTime,  // Add the missing fields
-    expectedStopTime = expectedStopTime,    // Add the missing fields
-    category = category
+    expectedStartTime = expectedStartTime,
+    expectedStopTime = expectedStopTime,
+    categoryId = categoryId // Updated: categoryId field instead of category
 )
