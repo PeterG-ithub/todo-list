@@ -6,41 +6,55 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
-import com.example.todo_list_v1.ui.task.TaskDetails
+import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
+import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryEntryModal(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    categoryUiState: CategoryUiState,
-    onCategoryValueChange: (CategoryDetails) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: CategoryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
+    // Reset the category details when the modal opens
+    LaunchedEffect(Unit) {
+        viewModel.updateUiState(CategoryDetails(name = ""))  // Clear the input
+    }
+
     AlertDialog(
         onDismissRequest = { onDismiss() },
         title = { Text(text = "New Category") },
         text = {
             Column {
                 TextField(
-                    value = categoryUiState.categoryDetails.name,
+                    value = viewModel.categoryUiState.categoryDetails.name,
                     placeholder = { Text(stringResource(R.string.category_entry_placeholder)) },
                     onValueChange = { newName ->
-                        // Create a new CategoryDetails object with the updated name
-                        val updatedCategoryDetails = categoryUiState.categoryDetails.copy(name = newName)
-                        onCategoryValueChange(updatedCategoryDetails) // Pass the updated details
+                        val updatedDetails = viewModel.categoryUiState.categoryDetails.copy(name = newName)
+                        viewModel.updateUiState(updatedDetails)
                     }
                 )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm() },
-                enabled = categoryUiState.isEntryValid
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.saveCategory()
+                    }
+                    onConfirm()
+                },
+                enabled = viewModel.categoryUiState.isEntryValid
             ) {
                 Text("Add")
             }
@@ -51,7 +65,8 @@ fun CategoryEntryModal(
             ) {
                 Text("Cancel")
             }
-        }
+        },
+        modifier = modifier
     )
 }
 
@@ -64,8 +79,6 @@ fun CategoryEntryModalPreview() {
         CategoryEntryModal(
             onDismiss = { /*TODO*/ },
             onConfirm = { /*TODO*/ },
-            categoryUiState = CategoryUiState(),
-            onCategoryValueChange = { },
             modifier = Modifier)
     }
 }

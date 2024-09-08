@@ -84,15 +84,12 @@ fun HomeScreen(
     navigateToTaskUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    categoryViewModel: CategoryViewModel = viewModel(factory = AppViewModelProvider.Factory) // Obtain CategoryViewModel
 ) {
     val homeUiState by homeViewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     // State for managing the visibility of the category entry modal
     val showCategoryEntryModal = remember { mutableStateOf(false) }
-
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -144,14 +141,7 @@ fun HomeScreen(
         if (showCategoryEntryModal.value) {
             CategoryEntryModal(
                 onDismiss = { showCategoryEntryModal.value = false },
-                onConfirm = {
-                    coroutineScope.launch {
-                        categoryViewModel.saveCategory() // Use categoryViewModel here
-                        showCategoryEntryModal.value = false
-                    }
-                },
-                categoryUiState = categoryViewModel.categoryUiState,
-                onCategoryValueChange = categoryViewModel::updateUiState
+                onConfirm = { showCategoryEntryModal.value = false }
             )
         }
     }
