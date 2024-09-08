@@ -1,9 +1,22 @@
 package com.example.todo_list_v1.data
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "tasks")
+@Entity(
+    tableName = "tasks",
+    foreignKeys = [
+        ForeignKey(
+            entity = Category::class,
+            parentColumns = ["id"],
+            childColumns = ["categoryId"],
+            onDelete = ForeignKey.SET_NULL // Optional: Set behavior when category is deleted
+        )
+    ],
+    indices = [Index(value = ["categoryId"])] // For faster querying by category
+)
 data class Task(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
@@ -22,5 +35,5 @@ data class Task(
     val totalTrackingTime: Long = 0, // Total time spent on the task
     val expectedStartTime: Long? = null, // Expected time when task is going to get started
     val expectedStopTime: Long? = null, // Expected time when task is over
-    val category: String? = null, // Category of the task
+    val categoryId: Int? = null // Foreign key to the Category table
 )
