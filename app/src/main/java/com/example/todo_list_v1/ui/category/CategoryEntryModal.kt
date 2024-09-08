@@ -29,7 +29,11 @@ fun CategoryEntryModal(
                 TextField(
                     value = categoryUiState.categoryDetails.name,
                     placeholder = { Text(stringResource(R.string.category_entry_placeholder)) },
-                    onValueChange = { }
+                    onValueChange = { newName ->
+                        // Create a new CategoryDetails object with the updated name
+                        val updatedCategoryDetails = categoryUiState.categoryDetails.copy(name = newName)
+                        onCategoryValueChange(updatedCategoryDetails) // Pass the updated details
+                    }
                 )
             }
         },

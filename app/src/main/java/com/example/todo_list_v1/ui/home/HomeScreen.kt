@@ -39,6 +39,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,12 +60,16 @@ import com.example.todo_list_v1.data.category.CategoryRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
+import com.example.todo_list_v1.ui.category.CategoryEntryModal
+import com.example.todo_list_v1.ui.category.CategoryUiState
+import com.example.todo_list_v1.ui.category.CategoryViewModel
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 
 object HomeDestination : NavigationDestination {
@@ -76,10 +83,16 @@ fun HomeScreen(
     navigateToTaskEntry: () -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    categoryViewModel: CategoryViewModel = viewModel(factory = AppViewModelProvider.Factory) // Obtain CategoryViewModel
 ) {
-    val homeUiState by viewModel.homeUiState.collectAsState()
+    val homeUiState by homeViewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    // State for managing the visibility of the category entry modal
+    val showCategoryEntryModal = remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -89,11 +102,12 @@ fun HomeScreen(
                     HomeTopAppBar(
                         categories = homeUiState.categoryList,
                         onCategoryClick = { },
-                        onCategoryEntryClick = { /*TODO*/ },
-                        modifier = modifier)
+                        onCategoryEntryClick = { showCategoryEntryModal.value = true },
+                        modifier = modifier
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { /* Handle more options click */ }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                     }
                 },
@@ -121,11 +135,25 @@ fun HomeScreen(
             taskList = homeUiState.taskList,
             onTaskClick = navigateToTaskUpdate,
             onTaskCheckedChange = { task, isChecked ->
-                viewModel.updateTaskCompletion(task, isChecked)
+                homeViewModel.updateTaskCompletion(task, isChecked)
             },
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
         )
+
+        if (showCategoryEntryModal.value) {
+            CategoryEntryModal(
+                onDismiss = { showCategoryEntryModal.value = false },
+                onConfirm = {
+                    coroutineScope.launch {
+                        categoryViewModel.saveCategory() // Use categoryViewModel here
+                        showCategoryEntryModal.value = false
+                    }
+                },
+                categoryUiState = categoryViewModel.categoryUiState,
+                onCategoryValueChange = categoryViewModel::updateUiState
+            )
+        }
     }
 }
 
@@ -330,37 +358,37 @@ fun TaskListPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview_NoTasks() {
-    HomeScreen(
-        navigateToTaskEntry = {},
-        navigateToTaskUpdate = {},
-        viewModel = HomeViewModel(
-            tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
-            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview_WithTasks() {
-    HomeScreen(
-        navigateToTaskEntry = {},
-        navigateToTaskUpdate = {},
-        viewModel = HomeViewModel(
-            tasksRepository = TasksRepositoryMock(listOf(
-                Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
-                Task(id = 2, name = "Task 2", description = "Description 2", isCompleted = true)
-            )), // Replace with a mock or test repository
-            categoryRepository = CategoryRepositoryMock(listOf(
-                Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
-                Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
-            )) // Replace with a mock or test repository
-        )
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenPreview_NoTasks() {
+//    HomeScreen(
+//        navigateToTaskEntry = {},
+//        navigateToTaskUpdate = {},
+//        viewModel = HomeViewModel(
+//            tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
+//            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
+//        )
+//    )
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenPreview_WithTasks() {
+//    HomeScreen(
+//        navigateToTaskEntry = {},
+//        navigateToTaskUpdate = {},
+//        viewModel = HomeViewModel(
+//            tasksRepository = TasksRepositoryMock(listOf(
+//                Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
+//                Task(id = 2, name = "Task 2", description = "Description 2", isCompleted = true)
+//            )), // Replace with a mock or test repository
+//            categoryRepository = CategoryRepositoryMock(listOf(
+//                Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
+//                Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
+//            )) // Replace with a mock or test repository
+//        ),
+//    )
+//}
 
 @Preview(showBackground = true)
 @Composable
