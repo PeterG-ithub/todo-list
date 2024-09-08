@@ -2,24 +2,33 @@ package com.example.todo_list_v1.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todo_list_v1.data.category.Category
+import com.example.todo_list_v1.data.category.CategoryRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
+class HomeViewModel(
+    private val tasksRepository: TasksRepository,
+    private val categoryRepository: CategoryRepository // Add the CategoryRepository
+) : ViewModel() {
 
-    val homeUiState: StateFlow<HomeUiState> =
-        tasksRepository.getAllTasksStream()
-            .map { HomeUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = HomeUiState()
-            )
+    val homeUiState: StateFlow<HomeUiState> = combine(
+        tasksRepository.getAllTasksStream(),
+        categoryRepository.getAllCategoriesStream()
+    ) { tasks, categories ->
+        HomeUiState(taskList = tasks, categoryList = categories)
+    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = HomeUiState()
+        )
 
     fun updateTaskCompletion(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
@@ -36,4 +45,7 @@ class HomeViewModel(private val tasksRepository: TasksRepository) : ViewModel() 
 /**
  * UI State for HomeScreen
  */
-data class HomeUiState(val taskList: List<Task> = listOf())
+data class HomeUiState(
+    val taskList: List<Task> = listOf(),
+    val categoryList: List<Category> = listOf() // Add category list
+)
