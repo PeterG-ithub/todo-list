@@ -13,7 +13,10 @@ import com.example.todo_list_v1.ui.task.TaskEntryViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            HomeViewModel(todoApplication().container.tasksRepository)
+            HomeViewModel(
+                todoApplication().container.tasksRepository,
+                todoApplication().container.categoryRepository
+            )
         }
 
         initializer {
