@@ -1,9 +1,10 @@
-package com.example.todo_list_v1.data
+package com.example.todo_list_v1.data.task
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.todo_list_v1.data.category.Category
 
 @Entity(
     tableName = "tasks",

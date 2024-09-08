@@ -1,4 +1,4 @@
-package com.example.todo_list_v1.data
+package com.example.todo_list_v1.data.task
 
 import kotlinx.coroutines.flow.Flow
 

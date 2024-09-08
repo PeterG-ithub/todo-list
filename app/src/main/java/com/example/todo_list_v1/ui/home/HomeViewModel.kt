@@ -2,8 +2,8 @@ package com.example.todo_list_v1.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todo_list_v1.data.Task
-import com.example.todo_list_v1.data.TasksRepository
+import com.example.todo_list_v1.data.task.Task
+import com.example.todo_list_v1.data.task.TasksRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

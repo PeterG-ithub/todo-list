@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.todo_list_v1.data.task.Task
+import com.example.todo_list_v1.data.task.TaskDao
 
 @Database(entities = [Task::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

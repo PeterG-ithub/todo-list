@@ -4,8 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.todo_list_v1.data.Task
-import com.example.todo_list_v1.data.TasksRepository
+import com.example.todo_list_v1.data.task.Task
+import com.example.todo_list_v1.data.task.TasksRepository
 
 class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
 

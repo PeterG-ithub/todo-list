@@ -44,8 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
-import com.example.todo_list_v1.data.Task
-import com.example.todo_list_v1.data.TasksRepository
+import com.example.todo_list_v1.data.task.Task
+import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme

@@ -196,13 +196,13 @@ fun TaskEntryBody(
                         modifier = Modifier.padding(end = 16.dp)
                     )
                     Text(
-                        text = selectedDate.ifEmpty { "Date" },
+                        text = "Date",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Sun, Sep 8",
+                        text = selectedDate.ifEmpty { "No Date" },
                         style = MaterialTheme.typography.bodyMedium, // Set the desired font size
                         modifier = Modifier
                             .background(
@@ -322,7 +322,7 @@ fun TaskEntryBody(
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Off",
+                        text = "5 minutes before",
                         style = MaterialTheme.typography.bodyMedium, // Set the desired font size
                         modifier = Modifier
                             .background(
@@ -392,12 +392,12 @@ fun DatePickerModal(
                 onDateSelected(datePickerState.selectedDateMillis)
                 onDismiss()
             }) {
-                Text("OK")
+                Text("DONE")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("CANCEL")
             }
         }
     ) {
