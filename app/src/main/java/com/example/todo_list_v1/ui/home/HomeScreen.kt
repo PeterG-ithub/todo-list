@@ -1,6 +1,9 @@
 package com.example.todo_list_v1.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,11 +13,14 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -42,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.task.Task
@@ -69,12 +77,19 @@ fun HomeScreen(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val sampleCategories = List(10) { index -> "Category ${index + 1}" }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(HomeDestination.titleRes)) },
+                title = {
+                    HomeTopAppBar(
+                        categories = sampleCategories,
+                        onCategoryClick = { },
+                        onCategoryEntryClick = { /*TODO*/ },
+                        modifier = modifier)
+                },
                 actions = {
                     IconButton(onClick = { /*TODO*/ }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
@@ -112,6 +127,87 @@ fun HomeScreen(
     }
 }
 
+@Composable
+private fun HomeTopAppBar(
+    categories: List<String>,
+    onCategoryClick: (String) -> Unit,
+    onCategoryEntryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            //.height(56.dp) // Standard height for top app bar
+    ) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                //.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+        ) {
+            item { // Use item instead of Text directly
+                Text(
+                    text = "All",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 12.sp,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(
+                            horizontal = 12.dp,
+                            vertical = 4.dp // Adjust as needed
+                        )
+                        .clickable { /* Handle click */ },
+                    textAlign = TextAlign.Center
+                )
+            }
+            items(categories.size) { index ->
+                Text(
+                    text = categories[index],
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 12.sp,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(
+                            horizontal = dimensionResource(id = R.dimen.padding_small),
+                            vertical = dimensionResource(id = R.dimen.padding_tiny)
+                        )
+                        .clickable { onCategoryClick(categories[index]) }
+                        .padding(horizontal = 8.dp, vertical = 0.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            item {
+                Text(
+                    text = "Add Task +",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.background,
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(
+                            horizontal = dimensionResource(id = R.dimen.padding_small),
+                            vertical = dimensionResource(id = R.dimen.padding_tiny)
+                        )
+                        .clickable { onCategoryEntryClick() }
+                        .padding(horizontal = 8.dp, vertical = 0.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
 @Composable
 private fun HomeBody(
     taskList: List<Task>,
@@ -258,7 +354,21 @@ fun HomeScreenPreview_WithTasks() {
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun PreviewHomeTopAppBar() {
+    val sampleCategories = List(1) { index -> "Category ${index + 1}" }
 
+    HomeTopAppBar(
+        categories = sampleCategories,
+        onCategoryClick = { category ->
+            // Handle category click here
+        },
+        onCategoryEntryClick = {
+
+        }
+    )
+}
 
 class TasksRepositoryMock(
     initialTasks: List<Task> = listOf()
