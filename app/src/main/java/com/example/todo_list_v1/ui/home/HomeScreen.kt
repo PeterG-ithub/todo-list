@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
+import com.example.todo_list_v1.data.category.Category
+import com.example.todo_list_v1.data.category.CategoryRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
@@ -60,6 +62,7 @@ import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 
 object HomeDestination : NavigationDestination {
@@ -77,7 +80,6 @@ fun HomeScreen(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val sampleCategories = List(10) { index -> "Category ${index + 1}" }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -85,7 +87,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     HomeTopAppBar(
-                        categories = sampleCategories,
+                        categories = homeUiState.categoryList,
                         onCategoryClick = { },
                         onCategoryEntryClick = { /*TODO*/ },
                         modifier = modifier)
@@ -129,8 +131,8 @@ fun HomeScreen(
 
 @Composable
 private fun HomeTopAppBar(
-    categories: List<String>,
-    onCategoryClick: (String) -> Unit,
+    categories: List<Category>,
+    onCategoryClick: (Category) -> Unit,
     onCategoryEntryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -165,29 +167,29 @@ private fun HomeTopAppBar(
                     textAlign = TextAlign.Center
                 )
             }
-            items(categories.size) { index ->
+            items(categories) { category ->
                 Text(
-                    text = categories[index],
+                    text = category.name, // Use the name property of the Category
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 12.sp,
                     color = Color.Black,
                     modifier = Modifier
                         .background(
                             color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(8.dp)
                         )
                         .padding(
                             horizontal = dimensionResource(id = R.dimen.padding_small),
                             vertical = dimensionResource(id = R.dimen.padding_tiny)
                         )
-                        .clickable { onCategoryClick(categories[index]) }
+                        .clickable { onCategoryClick(category) }
                         .padding(horizontal = 8.dp, vertical = 0.dp),
                     textAlign = TextAlign.Center
                 )
             }
             item {
                 Text(
-                    text = "Add Task +",
+                    text = "Add Category +",
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.primary,
@@ -208,6 +210,7 @@ private fun HomeTopAppBar(
         }
     }
 }
+
 @Composable
 private fun HomeBody(
     taskList: List<Task>,
@@ -334,7 +337,8 @@ fun HomeScreenPreview_NoTasks() {
         navigateToTaskEntry = {},
         navigateToTaskUpdate = {},
         viewModel = HomeViewModel(
-            TasksRepositoryMock() // Replace with a mock or test repository
+            tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
         )
     )
 }
@@ -346,9 +350,13 @@ fun HomeScreenPreview_WithTasks() {
         navigateToTaskEntry = {},
         navigateToTaskUpdate = {},
         viewModel = HomeViewModel(
-            TasksRepositoryMock(listOf(
+            tasksRepository = TasksRepositoryMock(listOf(
                 Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
                 Task(id = 2, name = "Task 2", description = "Description 2", isCompleted = true)
+            )), // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock(listOf(
+                Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
+                Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
             )) // Replace with a mock or test repository
         )
     )
@@ -357,7 +365,18 @@ fun HomeScreenPreview_WithTasks() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewHomeTopAppBar() {
-    val sampleCategories = List(1) { index -> "Category ${index + 1}" }
+    val sampleCategories = List(10) { index ->
+        Category(
+            id = index + 1,
+            name = "Category ${index + 1}",
+            description = "Description ${index + 1}",
+            color = null,
+            icon = null,
+            createdDate = System.currentTimeMillis(),
+            lastUpdated = System.currentTimeMillis(),
+            isArchived = false
+        )
+    }
 
     HomeTopAppBar(
         categories = sampleCategories,
@@ -365,7 +384,7 @@ private fun PreviewHomeTopAppBar() {
             // Handle category click here
         },
         onCategoryEntryClick = {
-
+            // Handle add category click here
         }
     )
 }
@@ -394,5 +413,51 @@ class TasksRepositoryMock(
     override suspend fun updateTask(task: Task) {
         tasksMap[task.id] = task
         tasksFlow.value = tasksMap.values.toList()
+    }
+}
+
+
+class CategoryRepositoryMock(
+    private val initialCategories: List<Category> = emptyList()
+) : CategoryRepository {
+
+    private val categoriesFlow = MutableStateFlow(initialCategories)
+
+    override fun getAllCategoriesStream(): Flow<List<Category>> = categoriesFlow
+
+    override fun getCategoryStream(id: Int): Flow<Category?> {
+        return categoriesFlow.map { categories ->
+            categories.find { it.id == id }
+        }
+    }
+
+    override suspend fun insertCategory(category: Category) {
+        // Add category to the list and update flow
+        val updatedList = categoriesFlow.value.toMutableList().apply {
+            add(category)
+        }
+        categoriesFlow.value = updatedList
+    }
+
+    override suspend fun updateCategory(category: Category) {
+        // Update category in the list and update flow
+        val updatedList = categoriesFlow.value.map {
+            if (it.id == category.id) category else it
+        }
+        categoriesFlow.value = updatedList
+    }
+
+    override suspend fun deleteCategory(category: Category) {
+        // Remove category from the list and update flow
+        val updatedList = categoriesFlow.value.filter { it.id != category.id }
+        categoriesFlow.value = updatedList
+    }
+
+    override suspend fun archiveCategory(categoryId: Int) {
+        // Archive category by updating its state and update flow
+        val updatedList = categoriesFlow.value.map {
+            if (it.id == categoryId) it.copy(isArchived = true) else it
+        }
+        categoriesFlow.value = updatedList
     }
 }
