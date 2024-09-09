@@ -21,7 +21,9 @@ object AppViewModelProvider {
         }
 
         initializer {
-            TaskEntryViewModel(todoApplication().container.tasksRepository)
+            TaskEntryViewModel(
+                todoApplication().container.tasksRepository,
+                todoApplication().container.categoryRepository)
         }
 
         initializer {

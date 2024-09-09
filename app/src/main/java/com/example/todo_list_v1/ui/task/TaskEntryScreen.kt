@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.TodoTopAppBar
+import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
@@ -75,6 +77,7 @@ fun TaskEntryScreen(
     canNavigateBack: Boolean = true,
     viewModel: TaskEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val categories by viewModel.categories.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
@@ -87,6 +90,7 @@ fun TaskEntryScreen(
     ) { innerPadding ->
         TaskEntryBody(
             taskUiState = viewModel.taskUiState,
+            categories = categories,
             onTaskValueChange = viewModel::updateUiState,
             onSaveClick = {
                 coroutineScope.launch {
@@ -106,13 +110,12 @@ fun TaskEntryScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(
     showCategoryMenu: Boolean,
-    categories: List<String>,
-    selectedCategory: String,
-    onCategorySelected: (String) -> Unit,
+    selectedCategory: Category?,
+    categories: List<Category>,
+    onCategorySelected: (Category?) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     DropdownMenu(
@@ -123,7 +126,7 @@ fun CategoryDropdown(
         categories.forEach { category ->
             DropdownMenuItem(
                 text = {
-                    Text(text = category)
+                    Text(text = category.name)
                 },
                 onClick = {
                     onCategorySelected(category)
@@ -134,10 +137,12 @@ fun CategoryDropdown(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEntryBody(
     taskUiState: TaskUiState,
+    categories: List<Category>,
     onTaskValueChange: (TaskDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -146,10 +151,7 @@ fun TaskEntryBody(
     var showCategoryMenu by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     var selectedDate by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("No Category") }
-
-    // List of categories
-    val categories = listOf("Work", "Personal", "Urgent", "Miscellaneous")
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
 
     // Handle date change when the picker is confirmed
     LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -176,7 +178,7 @@ fun TaskEntryBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable { showCategoryMenu = true } // Toggle the dropdown menu visibility
+                    .clickable { showCategoryMenu = true }
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -201,7 +203,7 @@ fun TaskEntryBody(
                             )
                     ) {
                         Text(
-                            text = selectedCategory,
+                            text = selectedCategory?.name ?: "No Category",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier
                                 .padding(
@@ -214,14 +216,14 @@ fun TaskEntryBody(
             // Use the CategoryDropdown composable
             CategoryDropdown(
                 showCategoryMenu = showCategoryMenu,
-                categories = categories,
                 selectedCategory = selectedCategory,
+                categories = categories,
                 onCategorySelected = { category ->
                     selectedCategory = category
+                    onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
                 },
                 onDismissRequest = { showCategoryMenu = false }
             )
-
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             Box(
                 modifier = Modifier
@@ -481,6 +483,7 @@ fun TaskInputForm(
 @Composable
 private fun TaskEntryScreenPreview() {
     Todolistv1Theme {
+        val categories = listOf<Category>()
         TaskEntryBody(
             taskUiState = TaskUiState(
                 TaskDetails(
@@ -488,6 +491,7 @@ private fun TaskEntryScreenPreview() {
                 )
             ),
             onTaskValueChange = {},
+            categories = categories,
             onSaveClick = {}
         )
     }
