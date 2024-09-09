@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -58,6 +60,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 object TaskEntryDestination : NavigationDestination {
     override val route = "task_entry"
@@ -105,6 +108,34 @@ fun TaskEntryScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun CategoryDropdown(
+    showCategoryMenu: Boolean,
+    categories: List<String>,
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    DropdownMenu(
+        expanded = showCategoryMenu,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        categories.forEach { category ->
+            DropdownMenuItem(
+                text = {
+                    Text(text = category)
+                },
+                onClick = {
+                    onCategorySelected(category)
+                    onDismissRequest()
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun TaskEntryBody(
     taskUiState: TaskUiState,
     onTaskValueChange: (TaskDetails) -> Unit,
@@ -112,8 +143,13 @@ fun TaskEntryBody(
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
+    var showCategoryMenu by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     var selectedDate by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("No Category") }
+
+    // List of categories
+    val categories = listOf("Work", "Personal", "Urgent", "Miscellaneous")
 
     // Handle date change when the picker is confirmed
     LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -140,9 +176,7 @@ fun TaskEntryBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable(onClick = {
-
-                    })
+                    .clickable { showCategoryMenu = true } // Toggle the dropdown menu visibility
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -150,7 +184,7 @@ fun TaskEntryBody(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.List,
-                        contentDescription = "Select date",
+                        contentDescription = "Select category",
                         modifier = Modifier.padding(end = 16.dp)
                     )
                     Text(
@@ -164,27 +198,38 @@ fun TaskEntryBody(
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
                                 shape = RoundedCornerShape(8.dp),
-                                )
+                            )
                     ) {
                         Text(
-                            text = "No Category",
-                            style = MaterialTheme.typography.bodyMedium, // Set the desired font size
+                            text = selectedCategory,
+                            style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier
                                 .padding(
-                                    horizontal = dimensionResource(id = R.dimen.padding_small), 
+                                    horizontal = dimensionResource(id = R.dimen.padding_small),
                                     vertical = dimensionResource(id = R.dimen.padding_tiny))
                         )
                     }
                 }
             }
+            // Use the CategoryDropdown composable
+            CategoryDropdown(
+                showCategoryMenu = showCategoryMenu,
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { category ->
+                    selectedCategory = category
+                },
+                onDismissRequest = { showCategoryMenu = false }
+            )
+
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable(onClick = {
+                    .clickable {
                         showDatePicker = true
-                    })
+                    }
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -203,7 +248,7 @@ fun TaskEntryBody(
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = selectedDate.ifEmpty { "No Date" },
-                        style = MaterialTheme.typography.bodyMedium, // Set the desired font size
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -222,9 +267,9 @@ fun TaskEntryBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable(onClick = {
+                    .clickable {
 
-                    })
+                    }
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -243,7 +288,7 @@ fun TaskEntryBody(
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = "7:30 AM - 9:00 AM",
-                        style = MaterialTheme.typography.bodyMedium, // Set the desired font size
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -261,16 +306,15 @@ fun TaskEntryBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable(onClick = {
+                    .clickable {
 
-                    })
+                    }
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-
                         painter = painterResource(id = R.drawable.repeat),
                         contentDescription = "Select date",
                         modifier = Modifier.padding(end = 16.dp)
@@ -283,7 +327,7 @@ fun TaskEntryBody(
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = "Custom",
-                        style = MaterialTheme.typography.bodyMedium, // Set the desired font size
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -302,9 +346,9 @@ fun TaskEntryBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable(onClick = {
+                    .clickable {
 
-                    })
+                    }
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -323,7 +367,7 @@ fun TaskEntryBody(
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = "5 minutes before",
-                        style = MaterialTheme.typography.bodyMedium, // Set the desired font size
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -366,6 +410,7 @@ fun TaskEntryBody(
         }
     }
 }
+
 
 fun convertMillisToDate(millis: Long?): String {
     return if (millis != null) {
