@@ -16,6 +16,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     fun getTask(id: Int): Flow<Task?>
 
+    @Query("SELECT * FROM tasks WHERE categoryId = :categoryId ORDER BY dueDate ASC")
+    fun getTasksByCategory(categoryId: Int): Flow<List<Task>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: Task)
 
