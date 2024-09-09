@@ -64,6 +64,7 @@ import com.example.todo_list_v1.ui.category.CategoryEntryModal
 import com.example.todo_list_v1.ui.category.CategoryUiState
 import com.example.todo_list_v1.ui.category.CategoryViewModel
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
+import com.example.todo_list_v1.ui.task.item.TaskItem
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -299,49 +300,6 @@ private fun TaskList(
     }
 }
 
-@Composable
-private fun TaskItem(
-    task: Task,
-    onTaskCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(id = R.dimen.padding_small)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = { isChecked ->
-                    onTaskCheckedChange(isChecked)
-                }
-            )
-            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
-            Text(text = task.name, style = MaterialTheme.typography.bodyLarge)
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TaskItemPreview() {
-    Todolistv1Theme {
-        TaskItem(
-            task = Task(
-                id = 1,
-                name = "Sample Task",
-                description = "This is a sample task description.",
-                isCompleted = false // Add this property to match your Task data class
-            ),
-            onTaskCheckedChange = { /* no-op */ } // Stub for the preview
-        )
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
