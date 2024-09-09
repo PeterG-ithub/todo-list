@@ -91,6 +91,12 @@ fun HomeScreen(
     // State for managing the visibility of the category entry modal
     val showCategoryEntryModal = remember { mutableStateOf(false) }
 
+    // State for managing the selected category
+    val selectedCategory = remember { mutableStateOf<Category?>(null) }
+
+    // Observe the filtered task list from ViewModel
+    val filteredTaskList by homeViewModel.filteredTasks.collectAsState()
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -98,13 +104,23 @@ fun HomeScreen(
                 title = {
                     HomeTopAppBar(
                         categories = homeUiState.categoryList,
-                        onCategoryClick = { },
+                        onCategoryClick = { category ->
+                            selectedCategory.value = category
+                            homeViewModel.selectCategory(category.id) // Update the category in ViewModel
+                        },
+                        onAllClick = {
+                            selectedCategory.value = null
+                            homeViewModel.selectCategory(null) // Show all tasks
+                        },
                         onCategoryEntryClick = { showCategoryEntryModal.value = true },
+                        selectedCategory = selectedCategory.value,
                         modifier = modifier
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /* Handle more options click */ }) {
+                    IconButton(onClick = {
+                        /* TODO */
+                    }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                     }
                 },
@@ -129,7 +145,7 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         HomeBody(
-            taskList = homeUiState.taskList,
+            taskList = filteredTaskList, // Use the filtered task list here
             onTaskClick = navigateToTaskUpdate,
             onTaskCheckedChange = { task, isChecked ->
                 homeViewModel.updateTaskCompletion(task, isChecked)
@@ -151,55 +167,51 @@ fun HomeScreen(
 private fun HomeTopAppBar(
     categories: List<Category>,
     onCategoryClick: (Category) -> Unit,
+    onAllClick: () -> Unit, // Special handler for the "All" option
     onCategoryEntryClick: () -> Unit,
+    selectedCategory: Category?, // Pass the selected category
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            //.height(56.dp) // Standard height for top app bar
     ) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
-                //.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
         ) {
-            item { // Use item instead of Text directly
+            item {
+                val isSelected = selectedCategory == null // "All" is selected when no category is
                 Text(
                     text = "All",
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 12.sp,
-                    color = Color.Black,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .padding(
-                            horizontal = 12.dp,
-                            vertical = 4.dp // Adjust as needed
-                        )
-                        .clickable { /* Handle click */ },
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .clickable { onAllClick() }, // Call onAllClick when "All" is clicked
                     textAlign = TextAlign.Center
                 )
             }
             items(categories) { category ->
+                val isSelected = selectedCategory == category
                 Text(
-                    text = category.name, // Use the name property of the Category
+                    text = category.name,
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 12.sp,
-                    color = Color.Black,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .padding(
-                            horizontal = dimensionResource(id = R.dimen.padding_small),
-                            vertical = dimensionResource(id = R.dimen.padding_tiny)
-                        )
+                        .padding(horizontal = dimensionResource(id = R.dimen.padding_small), vertical = dimensionResource(id = R.dimen.padding_tiny))
                         .clickable { onCategoryClick(category) }
                         .padding(horizontal = 8.dp, vertical = 0.dp),
                     textAlign = TextAlign.Center
@@ -228,6 +240,7 @@ private fun HomeTopAppBar(
         }
     }
 }
+
 
 @Composable
 private fun HomeBody(
@@ -348,37 +361,37 @@ fun TaskListPreview() {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeScreenPreview_NoTasks() {
-//    HomeScreen(
-//        navigateToTaskEntry = {},
-//        navigateToTaskUpdate = {},
-//        viewModel = HomeViewModel(
-//            tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
-//            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
-//        )
-//    )
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeScreenPreview_WithTasks() {
-//    HomeScreen(
-//        navigateToTaskEntry = {},
-//        navigateToTaskUpdate = {},
-//        viewModel = HomeViewModel(
-//            tasksRepository = TasksRepositoryMock(listOf(
-//                Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
-//                Task(id = 2, name = "Task 2", description = "Description 2", isCompleted = true)
-//            )), // Replace with a mock or test repository
-//            categoryRepository = CategoryRepositoryMock(listOf(
-//                Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
-//                Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
-//            )) // Replace with a mock or test repository
-//        ),
-//    )
-//}
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview_NoTasks() {
+    HomeScreen(
+        navigateToTaskEntry = {},
+        navigateToTaskUpdate = {},
+        homeViewModel = HomeViewModel(
+            tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview_WithTasks() {
+    HomeScreen(
+        navigateToTaskEntry = {},
+        navigateToTaskUpdate = {},
+        homeViewModel = HomeViewModel(
+            tasksRepository = TasksRepositoryMock(listOf(
+                Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
+                Task(id = 2, name = "Task 2", description = "Description 2", isCompleted = true)
+            )), // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock(listOf(
+                Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
+                Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
+            )) // Replace with a mock or test repository
+        ),
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -403,7 +416,9 @@ private fun PreviewHomeTopAppBar() {
         },
         onCategoryEntryClick = {
             // Handle add category click here
-        }
+        },
+        selectedCategory = null,
+        onAllClick = {}
     )
 }
 
@@ -423,6 +438,9 @@ class TasksRepositoryMock(
         tasksFlow.value = tasksMap.values.toList()
     }
 
+    override fun getTasksByCategoryStream(categoryId: Int): Flow<List<Task>> {
+        TODO("Not yet implemented")
+    }
     override suspend fun deleteTask(task: Task) {
         tasksMap.remove(task.id)
         tasksFlow.value = tasksMap.values.toList()
