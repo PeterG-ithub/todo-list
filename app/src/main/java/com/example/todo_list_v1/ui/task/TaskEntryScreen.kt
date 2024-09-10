@@ -208,7 +208,9 @@ fun TaskEntryBody(
                                 onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
                             },
                             onDismissRequest = { showCategoryMenu = false },
-                            onAddCategoryClick = onAddCategoryClick
+                            onAddCategoryClick = {
+                                onAddCategoryClick()
+                            }
                         )
                     }
                 }
@@ -253,15 +255,19 @@ fun TaskEntryBody(
 
                 }
             }
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable {
-
+                    .clickable(enabled = selectedDate.isNotEmpty()) {
+                        // Handle click
                     }
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                    )
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -269,20 +275,21 @@ fun TaskEntryBody(
                     Icon(
                         painter = painterResource(id = R.drawable.clock),
                         contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
+                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Text(
                         text = "Set Time",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "7:30 AM - 9:00 AM",
+                        text = "No",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -292,15 +299,21 @@ fun TaskEntryBody(
                     )
                 }
             }
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable {
-
+                    .clickable(enabled = selectedDate.isNotEmpty()) {
+                        // Handle click
                     }
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                    )
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -308,20 +321,21 @@ fun TaskEntryBody(
                     Icon(
                         painter = painterResource(id = R.drawable.repeat),
                         contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
+                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Text(
                         text = "Repeat Task",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Custom",
+                        text = "No",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -332,15 +346,20 @@ fun TaskEntryBody(
                 }
             }
 
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+            )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clickable {
-
+                    .clickable(enabled = selectedDate.isNotEmpty()) {
+                        // Handle click
                     }
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                    )
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -348,12 +367,13 @@ fun TaskEntryBody(
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
+                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Text(
                         text = "Alarm",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
@@ -361,7 +381,7 @@ fun TaskEntryBody(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -371,7 +391,10 @@ fun TaskEntryBody(
                     )
                 }
             }
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+            )
             OutlinedTextField(
                 value = "Add Note",
                 onValueChange = { },
