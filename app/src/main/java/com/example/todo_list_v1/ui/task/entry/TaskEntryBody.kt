@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.category.Category
@@ -69,7 +71,7 @@ fun TaskEntryBody(
             .padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_extra_large))
     ) {
-        TaskInputForm(
+        TaskEntryForm(
             taskDetails = taskUiState.taskDetails,
             onValueChange = onTaskValueChange,
             modifier = Modifier
@@ -340,4 +342,32 @@ fun TaskEntryBody(
             Text(text = stringResource(R.string.save_action))
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaskEntryBodyPreview() {
+    val sampleCategories = listOf(
+        Category(id = 1, name = "Work"),
+        Category(id = 2, name = "Personal"),
+        Category(id = 3, name = "Hobby")
+    )
+
+    val sampleTaskUiState = TaskUiState(
+        taskDetails = TaskDetails(
+            name = "Sample Task",
+            description = "This is a sample task description.",
+            categoryId = null
+        ),
+        isEntryValid = true
+    )
+
+    TaskEntryBody(
+        taskUiState = sampleTaskUiState,
+        categories = sampleCategories,
+        onTaskValueChange = { /* Handle task value change */ },
+        onSaveClick = { /* Handle save click */ },
+        modifier = Modifier.fillMaxSize(),
+        onAddCategoryClick = { /* Handle add category click */ }
+    )
 }
