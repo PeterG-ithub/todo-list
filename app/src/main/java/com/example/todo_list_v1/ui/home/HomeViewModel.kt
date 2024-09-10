@@ -50,6 +50,12 @@ class HomeViewModel(
         _selectedCategoryId.value = categoryId
     }
 
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            tasksRepository.deleteTask(task)
+        }
+    }
+
     fun updateTaskCompletion(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
             val updatedTask = task.copy(isCompleted = isCompleted)

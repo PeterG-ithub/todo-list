@@ -148,6 +148,9 @@ fun HomeScreen(
         HomeBody(
             taskList = filteredTaskList, // Use the filtered task list here
             onTaskClick = navigateToTaskUpdate,
+            onTaskDeleteClick = { task ->
+                homeViewModel.deleteTask(task)
+            },
             onTaskCheckedChange = { task, isChecked ->
                 homeViewModel.updateTaskCompletion(task, isChecked)
             },
@@ -250,6 +253,7 @@ private fun HomeBody(
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onTaskDeleteClick: (Task) -> Unit = { }
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -266,6 +270,7 @@ private fun HomeBody(
             TaskList(
                 taskList = taskList,
                 onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
                 onTaskCheckedChange = onTaskCheckedChange,
                 contentPadding = contentPadding,
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
@@ -280,7 +285,8 @@ private fun TaskList(
     onTaskClick: (Task) -> Unit,
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     contentPadding: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTaskDeleteClick: (Task) -> Unit = { }
 ) {
     LazyColumn(
         modifier = modifier,
@@ -292,6 +298,7 @@ private fun TaskList(
                 onTaskCheckedChange = { isChecked ->
                     onTaskCheckedChange(task, isChecked)
                 },
+                onDeleteClick = { onTaskDeleteClick(task) },
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_tiny))
                     .clickable { onTaskClick(task) }
