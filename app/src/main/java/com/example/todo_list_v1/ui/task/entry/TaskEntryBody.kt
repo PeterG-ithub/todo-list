@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,59 +81,20 @@ fun TaskEntryBody(
 
         Column {
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clickable { showCategoryMenu = true }
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.List,
-                        contentDescription = "Select category",
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                    Text(
-                        text = "Category",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                    ) {
-                        Text(
-                            text = selectedCategory?.name ?: "No Category",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = dimensionResource(id = R.dimen.padding_small),
-                                    vertical = dimensionResource(id = R.dimen.padding_tiny)
-                                )
-                        )
-                        CategoryDropdown(
-                            showCategoryMenu = showCategoryMenu,
-                            selectedCategory = selectedCategory,
-                            categories = categories,
-                            onCategorySelected = { category ->
-                                selectedCategory = category
-                                onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
-                            },
-                            onDismissRequest = { showCategoryMenu = false },
-                            onAddCategoryClick = {
-                                onAddCategoryClick()
-                            }
-                        )
-                    }
+            CategorySelector(
+                onClick = { showCategoryMenu = true},
+                showCategoryMenu = showCategoryMenu,
+                selectedCategory = selectedCategory,
+                categories = categories,
+                onCategorySelected = { category ->
+                    selectedCategory = category
+                    onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
+                },
+                onDismissRequest = { showCategoryMenu = false },
+                onAddCategoryClick = {
+                    onAddCategoryClick()
                 }
-            }
+            )
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             Box(
                 modifier = Modifier
@@ -207,7 +169,9 @@ fun TaskEntryBody(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
+                                    alpha = 0.6f
+                                ),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -230,7 +194,9 @@ fun TaskEntryBody(
                         // Handle click
                     }
                     .background(
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                            alpha = 0.2f
+                        )
                     )
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -253,7 +219,9 @@ fun TaskEntryBody(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
+                                    alpha = 0.6f
+                                ),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -276,7 +244,9 @@ fun TaskEntryBody(
                         // Handle click
                     }
                     .background(
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                            alpha = 0.2f
+                        )
                     )
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
@@ -299,7 +269,9 @@ fun TaskEntryBody(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
+                                    alpha = 0.6f
+                                ),
                                 shape = RoundedCornerShape(8.dp),
                             )
                             .padding(
@@ -342,6 +314,37 @@ fun TaskEntryBody(
             Text(text = stringResource(R.string.save_action))
         }
     }
+}
+
+@Composable
+fun CategorySelector(
+    onClick: () -> Unit,
+    selectedCategory: Category?,
+    showCategoryMenu: Boolean,
+    categories: List<Category>,
+    onCategorySelected: (Category?) -> Unit,
+    onDismissRequest: () -> Unit,
+    onAddCategoryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SelectorItem(
+        onClick = { onClick() },
+        leadingIcon = LeadingIcon.VectorIcon(Icons.Default.List),
+        leadingText = "Category",
+        trailingText = selectedCategory?.name ?: "No Category",
+        selector = {
+            CategoryDropdown(
+                showCategoryMenu = showCategoryMenu,
+                selectedCategory = selectedCategory,
+                categories = categories,
+                onCategorySelected = onCategorySelected,
+                onDismissRequest = onDismissRequest,
+                onAddCategoryClick = onAddCategoryClick
+            )
+        },
+        enabled = true,
+        modifier = modifier
+    )
 }
 
 @Preview(showBackground = true)
