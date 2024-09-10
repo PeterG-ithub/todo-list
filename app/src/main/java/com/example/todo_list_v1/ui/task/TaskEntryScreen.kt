@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
@@ -50,12 +51,14 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.TodoTopAppBar
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.ui.AppViewModelProvider
+import com.example.todo_list_v1.ui.category.CategoryEntryModal
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.launch
@@ -79,6 +82,9 @@ fun TaskEntryScreen(
 ) {
     val categories by viewModel.categories.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+
+    // State for managing the visibility of the category entry modal
+    val showCategoryEntryModal = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TodoTopAppBar(
@@ -105,38 +111,20 @@ fun TaskEntryScreen(
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .verticalScroll(rememberScrollState())
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            onAddCategoryClick = {
+                showCategoryEntryModal.value = true
+            }
         )
-    }
-}
 
-@Composable
-fun CategoryDropdown(
-    showCategoryMenu: Boolean,
-    selectedCategory: Category?,
-    categories: List<Category>,
-    onCategorySelected: (Category?) -> Unit,
-    onDismissRequest: () -> Unit
-) {
-    DropdownMenu(
-        expanded = showCategoryMenu,
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        categories.forEach { category ->
-            DropdownMenuItem(
-                text = {
-                    Text(text = category.name)
-                },
-                onClick = {
-                    onCategorySelected(category)
-                    onDismissRequest()
-                }
+        if (showCategoryEntryModal.value) {
+            CategoryEntryModal(
+                onDismiss = { showCategoryEntryModal.value = false },
+                onConfirm = { showCategoryEntryModal.value = false }
             )
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,7 +133,8 @@ fun TaskEntryBody(
     categories: List<Category>,
     onTaskValueChange: (TaskDetails) -> Unit,
     onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddCategoryClick: () -> Unit = { }
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
@@ -210,20 +199,20 @@ fun TaskEntryBody(
                                     horizontal = dimensionResource(id = R.dimen.padding_small),
                                     vertical = dimensionResource(id = R.dimen.padding_tiny))
                         )
+                        CategoryDropdown(
+                            showCategoryMenu = showCategoryMenu,
+                            selectedCategory = selectedCategory,
+                            categories = categories,
+                            onCategorySelected = { category ->
+                                selectedCategory = category
+                                onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
+                            },
+                            onDismissRequest = { showCategoryMenu = false },
+                            onAddCategoryClick = onAddCategoryClick
+                        )
                     }
                 }
             }
-            // Use the CategoryDropdown composable
-            CategoryDropdown(
-                showCategoryMenu = showCategoryMenu,
-                selectedCategory = selectedCategory,
-                categories = categories,
-                onCategorySelected = { category ->
-                    selectedCategory = category
-                    onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
-                },
-                onDismissRequest = { showCategoryMenu = false }
-            )
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             Box(
                 modifier = Modifier
@@ -402,6 +391,7 @@ fun TaskEntryBody(
             )
         }
 
+
         Button(
             onClick = onSaveClick,
             enabled = taskUiState.isEntryValid,
@@ -410,6 +400,68 @@ fun TaskEntryBody(
         ) {
             Text(text = stringResource(R.string.save_action))
         }
+    }
+}
+
+
+
+@Composable
+fun CategoryDropdown(
+    showCategoryMenu: Boolean,
+    selectedCategory: Category?,
+    categories: List<Category>,
+    onCategorySelected: (Category?) -> Unit,
+    onDismissRequest: () -> Unit,
+    onAddCategoryClick: () -> Unit,
+) {
+    DropdownMenu(
+        expanded = showCategoryMenu,
+        onDismissRequest = onDismissRequest,
+        offset = DpOffset(x = 0.dp, y = dimensionResource(id = R.dimen.padding_tiny)),
+        modifier = Modifier
+            .background(color = MaterialTheme.colorScheme.background)
+            .padding(
+                horizontal = dimensionResource(id = R.dimen.padding_tiny)
+            )
+    ) {
+        DropdownMenuItem(
+            text = {
+                Text(text = "No Category")
+            },
+            onClick = {
+                onCategorySelected(null)
+                onDismissRequest()
+            },
+            modifier = Modifier
+        )
+        categories.forEach { category ->
+            DropdownMenuItem(
+                text = {
+                    Text(text = category.name)
+                },
+                onClick = {
+                    onCategorySelected(category)
+                    onDismissRequest()
+                }
+            )
+        }
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = "Add Category",
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector =  Icons.Default.Add,
+                    contentDescription = null
+                )
+            },
+            onClick = {
+                onAddCategoryClick()
+            }
+        )
     }
 }
 
