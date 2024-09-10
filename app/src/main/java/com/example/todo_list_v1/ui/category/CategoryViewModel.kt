@@ -14,7 +14,6 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     var categoryUiState by mutableStateOf(CategoryUiState())
         private set
 
-
     // State to hold all categories
     var allCategories by mutableStateOf<List<Category>>(emptyList())
         private set
@@ -59,7 +58,12 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
 
     private fun validateInput(uiState: CategoryDetails = categoryUiState.categoryDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank() // Adjust validation as needed
+            name.isNotBlank() && isNameUnique(name)
         }
+    }
+
+    private fun isNameUnique(name: String): Boolean {
+        // Check if the name is unique by comparing it against the list of all categories
+        return allCategories.none { it.name.equals(name, ignoreCase = true) }
     }
 }

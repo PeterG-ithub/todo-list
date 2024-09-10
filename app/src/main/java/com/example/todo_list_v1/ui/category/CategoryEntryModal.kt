@@ -26,8 +26,9 @@ fun CategoryEntryModal(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Reset the category details when the modal opens
+    // Fetch categories and reset the category details when the modal opens
     LaunchedEffect(Unit) {
+        viewModel.fetchAllCategories()  // Ensure categories are fetched
         viewModel.updateUiState(CategoryDetails(name = ""))  // Clear the input
     }
 
@@ -51,8 +52,8 @@ fun CategoryEntryModal(
                 onClick = {
                     coroutineScope.launch {
                         viewModel.saveCategory()
+                        onConfirm()
                     }
-                    onConfirm()
                 },
                 enabled = viewModel.categoryUiState.isEntryValid
             ) {
