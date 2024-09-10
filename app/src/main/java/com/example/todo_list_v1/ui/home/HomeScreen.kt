@@ -140,7 +140,30 @@ fun HomeScreen(
                     MoreOptionDropdown(
                         onDismissRequest = { showDropdownMenu = false },
                         showOptionMenu = showDropdownMenu,
-                        onOptionSelected = {}
+                        onOptionSelected = { option ->
+                            when(option) {
+                                "Add" -> {
+                                    showDropdownMenu = false
+                                    showCategoryEntryModal.value = true
+                                }
+                                "Manage" -> {
+
+                                }
+                                "Delete" -> {
+                                    selectedCategory.value?.let { category ->
+                                        homeViewModel.deleteCategory(category)
+                                    }
+                                    selectedCategory.value = null
+                                    homeViewModel.selectCategory(null)
+                                }
+                                "Sort" -> {
+
+                                }
+                                else -> {
+                                    showDropdownMenu = false
+                                }
+                            }
+                        }
                     )
                 },
                 scrollBehavior = scrollBehavior
