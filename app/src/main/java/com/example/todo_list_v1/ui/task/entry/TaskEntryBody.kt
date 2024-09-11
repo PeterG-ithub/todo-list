@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,12 +55,14 @@ fun TaskEntryBody(
     modifier: Modifier = Modifier,
     onAddCategoryClick: () -> Unit = { }
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val datePickerState = rememberDatePickerState()
     var selectedDate by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
+    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
 
     // Handle date change when the picker is confirmed
     LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -120,11 +123,26 @@ fun TaskEntryBody(
                 thickness = 1.dp,
                 color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
             SelectorItem(
-                onClick = { },
+                onClick = { showTimePicker = true },
                 leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.clock)),
                 leadingText = "Set Time",
-                trailingText = "No",
-                selector = { },
+                trailingText = selectedTimeMillis?.let {
+                    formatTimeMillis(it)
+                } ?: "No Time",
+                selector = {
+                    if (showTimePicker) {
+                        TimePickerModal(
+                            onDismiss = { showTimePicker = false },
+                            onConfirm = { timePickerState ->
+                                val hour = timePickerState.hour
+                                val minute = timePickerState.minute
+                                selectedTimeMillis = convertTimeToMillis(hour, minute)
+                                onTaskValueChange(taskUiState.taskDetails.copy(expectedStartTime = selectedTimeMillis))
+                                showTimePicker = false
+                            }
+                        )
+                    }
+                },
                 enabled = selectedDate.isNotEmpty()
             )
             HorizontalDivider(
