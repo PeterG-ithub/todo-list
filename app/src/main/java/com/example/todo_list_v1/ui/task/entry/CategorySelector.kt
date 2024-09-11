@@ -35,12 +35,16 @@ fun CategorySelector(
     val showCategoryEntryModal = remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
 
+    fun getCategoryNameById(id: Int?): String {
+        return categories.find { it.id == id }?.name ?: "No Category"
+    }
 
+    println(categories)
     SelectorItem(
         onClick = { showCategoryMenu = true },
         leadingIcon = LeadingIcon.VectorIcon(Icons.Default.List),
         leadingText = "Category",
-        trailingText = selectedCategory?.name ?: "No Category",
+        trailingText = getCategoryNameById(taskDetails.categoryId),
         selector = {
             CategoryDropdown(
                 showCategoryMenu = showCategoryMenu,
