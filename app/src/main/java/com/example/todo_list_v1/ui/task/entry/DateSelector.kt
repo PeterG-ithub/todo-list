@@ -1,5 +1,7 @@
 package com.example.todo_list_v1.ui.task.entry
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -7,10 +9,51 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.example.todo_list_v1.data.category.Category
+import com.example.todo_list_v1.ui.task.TaskDetails
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateSelector(
+    modifier: Modifier = Modifier,
+    taskDetails: TaskDetails,
+    onValueChange: (TaskDetails) -> Unit = {},
+) {
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var selectedDate by remember { mutableStateOf("") }
+
+    SelectorItem(
+        onClick = {
+            showDatePicker = true
+        },
+        leadingIcon = LeadingIcon.VectorIcon(Icons.Default.DateRange),
+        leadingText = "Date",
+        trailingText = selectedDate.ifEmpty { "No Date" },
+        selector = {
+            if (showDatePicker) {
+                DatePickerModal(
+                    onDateSelected = { date ->
+                        selectedDate = date?.let { convertMillisToDate(it) } ?: "No date selected"
+                        onValueChange(taskDetails.copy(dueDate = date))
+                    },
+                    onDismiss = { showDatePicker = false }
+                )
+            }
+        }
+    )
+}
+
 
 fun convertMillisToDate(millis: Long?): String {
     return if (millis != null) {
@@ -47,14 +90,14 @@ fun DatePickerModal(
         confirmButton = {
             TextButton(onClick = {
                 // Debugging logs
-                println("Selected millis: ${datePickerState.selectedDateMillis}")
+                //println("Selected millis: ${datePickerState.selectedDateMillis}")
 
                 // Convert to Date and log
                 val calendar = Calendar.getInstance().apply {
                     timeInMillis = datePickerState.selectedDateMillis ?: 0
                 }
                 val formatter = SimpleDateFormat("EEE, MMM dd", Locale.getDefault())
-                println("Formatted date: ${formatter.format(calendar.time)}")
+                //println("Formatted date: ${formatter.format(calendar.time)}")
 
                 onDateSelected(datePickerState.selectedDateMillis)
                 onDismiss()

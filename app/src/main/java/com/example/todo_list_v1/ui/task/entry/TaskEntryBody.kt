@@ -1,5 +1,6 @@
 package com.example.todo_list_v1.ui.task.entry
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,19 +45,13 @@ fun TaskEntryBody(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var ifDateSelected by remember { mutableStateOf(false) }
 
-    val datePickerState = rememberDatePickerState()
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
-
-    // Handle date change when the picker is confirmed
-    LaunchedEffect(datePickerState.selectedDateMillis) {
-        selectedDate = datePickerState.selectedDateMillis?.let {
-            convertMillisToDate(it)
-        } ?: ""
+    LaunchedEffect(taskUiState.taskDetails.dueDate) {
+        ifDateSelected = taskUiState.taskDetails.dueDate != null
     }
+    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
 
     Column(
         modifier = modifier
@@ -78,28 +74,14 @@ fun TaskEntryBody(
                 categories = categories
             )
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
-            SelectorItem(
-                onClick = {
-                    showDatePicker = true
-                },
-                leadingIcon = LeadingIcon.VectorIcon(Icons.Default.DateRange),
-                leadingText = "Date",
-                trailingText = selectedDate.ifEmpty { "No Date" },
-                selector = {
-                    if (showDatePicker) {
-                        DatePickerModal(
-                            onDateSelected = { date ->
-                                selectedDate = date?.let { convertMillisToDate(it) } ?: "No date selected"
-                                onTaskValueChange(taskUiState.taskDetails.copy(dueDate = date))
-                            },
-                            onDismiss = { showDatePicker = false }
-                        )
-                    }
-                }
+            DateSelector(
+                taskDetails = taskUiState.taskDetails,
+                onValueChange = onTaskValueChange,
+                modifier = Modifier,
             )
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
             SelectorItem(
                 onClick = { showTimePicker = true },
                 leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.clock)),
@@ -121,11 +103,11 @@ fun TaskEntryBody(
                         )
                     }
                 },
-                enabled = selectedDate.isNotEmpty()
+                enabled = ifDateSelected
             )
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
 
             SelectorItem(
@@ -136,12 +118,12 @@ fun TaskEntryBody(
                 leadingText = "Repeat Task",
                 trailingText = "No",
                 selector = { },
-                enabled = selectedDate.isNotEmpty()
+                enabled = ifDateSelected
             )
 
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
             SelectorItem(
                 onClick = { /*TODO*/ },
@@ -149,12 +131,12 @@ fun TaskEntryBody(
                 leadingText = "Alarm",
                 trailingText = "Off",
                 selector = { },
-                enabled = selectedDate.isNotEmpty()
+                enabled = ifDateSelected
             )
 
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
             OutlinedTextField(
                 value = "Add Note",
