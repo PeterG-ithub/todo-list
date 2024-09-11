@@ -1,38 +1,27 @@
 package com.example.todo_list_v1.ui.task.entry
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
@@ -53,15 +42,12 @@ fun TaskEntryBody(
     onTaskValueChange: (TaskDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onAddCategoryClick: () -> Unit = { }
 ) {
-    var showCategoryMenu by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     val datePickerState = rememberDatePickerState()
     var selectedDate by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
 
     // Handle date change when the picker is confirmed
@@ -86,18 +72,10 @@ fun TaskEntryBody(
         Column {
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             CategorySelector(
-                onClick = { showCategoryMenu = true},
-                showCategoryMenu = showCategoryMenu,
-                selectedCategory = selectedCategory,
-                categories = categories,
-                onCategorySelected = { category ->
-                    selectedCategory = category
-                    onTaskValueChange(taskUiState.taskDetails.copy(categoryId = category?.id))
-                },
-                onDismissRequest = { showCategoryMenu = false },
-                onAddCategoryClick = {
-                    onAddCategoryClick()
-                }
+                taskDetails = taskUiState.taskDetails,
+                onValueChange = onTaskValueChange,
+                modifier = Modifier,
+                categories = categories
             )
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
             SelectorItem(
@@ -198,36 +176,6 @@ fun TaskEntryBody(
     }
 }
 
-@Composable
-fun CategorySelector(
-    onClick: () -> Unit,
-    selectedCategory: Category?,
-    showCategoryMenu: Boolean,
-    categories: List<Category>,
-    onCategorySelected: (Category?) -> Unit,
-    onDismissRequest: () -> Unit,
-    onAddCategoryClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    SelectorItem(
-        onClick = { onClick() },
-        leadingIcon = LeadingIcon.VectorIcon(Icons.Default.List),
-        leadingText = "Category",
-        trailingText = selectedCategory?.name ?: "No Category",
-        selector = {
-            CategoryDropdown(
-                showCategoryMenu = showCategoryMenu,
-                selectedCategory = selectedCategory,
-                categories = categories,
-                onCategorySelected = onCategorySelected,
-                onDismissRequest = onDismissRequest,
-                onAddCategoryClick = onAddCategoryClick
-            )
-        },
-        enabled = true,
-        modifier = modifier
-    )
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -252,7 +200,6 @@ fun TaskEntryBodyPreview() {
         categories = sampleCategories,
         onTaskValueChange = { /* Handle task value change */ },
         onSaveClick = { /* Handle save click */ },
-        modifier = Modifier.fillMaxSize(),
-        onAddCategoryClick = { /* Handle add category click */ }
+        modifier = Modifier
     )
 }

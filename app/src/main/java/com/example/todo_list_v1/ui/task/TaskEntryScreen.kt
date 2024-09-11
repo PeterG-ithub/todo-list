@@ -45,9 +45,6 @@ fun TaskEntryScreen(
 ) {
     val categories by viewModel.categories.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-
-    // State for managing the visibility of the category entry modal
-    val showCategoryEntryModal = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TodoTopAppBar(
@@ -74,18 +71,9 @@ fun TaskEntryScreen(
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .verticalScroll(rememberScrollState())
-                .fillMaxWidth(),
-            onAddCategoryClick = {
-                showCategoryEntryModal.value = true
-            }
+                .fillMaxWidth()
         )
 
-        if (showCategoryEntryModal.value) {
-            CategoryEntryModal(
-                onDismiss = { showCategoryEntryModal.value = false },
-                onConfirm = { showCategoryEntryModal.value = false }
-            )
-        }
     }
 }
 
