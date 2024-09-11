@@ -86,6 +86,16 @@ fun TaskEntryBody(
             HorizontalDivider(
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.onBackground )
+
+            RepeatSelector(
+                taskDetails = taskUiState.taskDetails,
+                onValueChange = onTaskValueChange,
+                modifier = Modifier,
+                enable = true
+            )
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
             TimeSelector(
                 taskDetails = taskUiState.taskDetails,
                 onValueChange = onTaskValueChange,
@@ -94,32 +104,14 @@ fun TaskEntryBody(
             )
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
-
-            SelectorItem(
-                onClick = {
-                    // Handle click event if needed
-                },
-                leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.repeat)),
-                leadingText = "Repeat Task",
-                trailingText = "No",
-                selector = { },
-                enabled = ifDateSelected
-            )
-
-            HorizontalDivider(
-                thickness = 1.dp,
                 color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
-            SelectorItem(
-                onClick = { /*TODO*/ },
-                leadingIcon = LeadingIcon.VectorIcon(Icons.Default.Notifications),
-                leadingText = "Alarm",
-                trailingText = "Off",
-                selector = { },
-                enabled = ifDateSelected
+            AlarmSelector(
+                taskDetails = taskUiState.taskDetails,
+                onValueChange = onTaskValueChange,
+                modifier = Modifier,
+                enable = ifTimeSelected
             )
-
             HorizontalDivider(
                 thickness = 1.dp,
                 color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
