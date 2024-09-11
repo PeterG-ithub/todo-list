@@ -45,13 +45,13 @@ fun TaskEntryBody(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showTimePicker by remember { mutableStateOf(false) }
     var ifDateSelected by remember { mutableStateOf(false) }
+    var ifTimeSelected by remember { mutableStateOf(false) }
 
-    LaunchedEffect(taskUiState.taskDetails.dueDate) {
+    LaunchedEffect(taskUiState.taskDetails.dueDate, taskUiState.taskDetails.expectedStartTime) {
         ifDateSelected = taskUiState.taskDetails.dueDate != null
+        ifTimeSelected = taskUiState.taskDetails.expectedStartTime != null
     }
-    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
 
     Column(
         modifier = modifier
@@ -66,14 +66,18 @@ fun TaskEntryBody(
         )
 
         Column {
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground)
             CategorySelector(
                 taskDetails = taskUiState.taskDetails,
                 onValueChange = onTaskValueChange,
                 modifier = Modifier,
                 categories = categories
             )
-            HorizontalDivider(thickness = 1.dp, color = Color.Black)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground)
             DateSelector(
                 taskDetails = taskUiState.taskDetails,
                 onValueChange = onTaskValueChange,
@@ -81,34 +85,16 @@ fun TaskEntryBody(
             )
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
-            SelectorItem(
-                onClick = { showTimePicker = true },
-                leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.clock)),
-                leadingText = "Set Time",
-                trailingText = selectedTimeMillis?.let {
-                    formatTimeMillis(it)
-                } ?: "No Time",
-                selector = {
-                    if (showTimePicker) {
-                        TimePickerModal(
-                            onDismiss = { showTimePicker = false },
-                            onConfirm = { timePickerState ->
-                                val hour = timePickerState.hour
-                                val minute = timePickerState.minute
-                                selectedTimeMillis = convertTimeToMillis(hour, minute)
-                                onTaskValueChange(taskUiState.taskDetails.copy(expectedStartTime = selectedTimeMillis))
-                                showTimePicker = false
-                            }
-                        )
-                    }
-                },
-                enabled = ifDateSelected
+                color = MaterialTheme.colorScheme.onBackground )
+            TimeSelector(
+                taskDetails = taskUiState.taskDetails,
+                onValueChange = onTaskValueChange,
+                modifier = Modifier,
+                enable = ifDateSelected
             )
             HorizontalDivider(
                 thickness = 1.dp,
-                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
-            )
+                color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
 
             SelectorItem(
                 onClick = {

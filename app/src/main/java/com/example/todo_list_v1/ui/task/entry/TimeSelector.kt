@@ -9,10 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,8 +33,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.todo_list_v1.R
+import com.example.todo_list_v1.ui.task.TaskDetails
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import java.util.Calendar
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimeSelector(
+    modifier: Modifier = Modifier,
+    taskDetails: TaskDetails,
+    onValueChange: (TaskDetails) -> Unit = {},
+    enable: Boolean = true,
+) {
+
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
+
+    SelectorItem(
+        modifier = modifier,
+        onClick = { showTimePicker = true },
+        leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.clock)),
+        leadingText = "Set Time",
+        trailingText = selectedTimeMillis?.let {
+            formatTimeMillis(it)
+        } ?: "No Time",
+        selector = {
+            if (showTimePicker) {
+                TimePickerModal(
+                    onDismiss = { showTimePicker = false },
+                    onConfirm = { timePickerState ->
+                        val hour = timePickerState.hour
+                        val minute = timePickerState.minute
+                        selectedTimeMillis = convertTimeToMillis(hour, minute)
+                        onValueChange(taskDetails.copy(expectedStartTime = selectedTimeMillis))
+                        showTimePicker = false
+                    }
+                )
+            }
+        },
+        enabled = enable
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
