@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +29,13 @@ fun DateSelector(
     taskDetails: TaskDetails,
     onValueChange: (TaskDetails) -> Unit = {},
 ) {
-
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-    var selectedDate by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("No Date") }
+
+    // Update selectedDate when taskDetails.dueDate changes
+    LaunchedEffect(taskDetails.dueDate) {
+        selectedDate = taskDetails.dueDate?.let { convertMillisToDate(it) } ?: "No Date"
+    }
 
     SelectorItem(
         onClick = {
@@ -39,7 +43,7 @@ fun DateSelector(
         },
         leadingIcon = LeadingIcon.VectorIcon(Icons.Default.DateRange),
         leadingText = "Date",
-        trailingText = selectedDate.ifEmpty { "No Date" },
+        trailingText = selectedDate,
         selector = {
             if (showDatePicker) {
                 DatePickerModal(
@@ -53,7 +57,6 @@ fun DateSelector(
         }
     )
 }
-
 
 fun convertMillisToDate(millis: Long?): String {
     return if (millis != null) {
