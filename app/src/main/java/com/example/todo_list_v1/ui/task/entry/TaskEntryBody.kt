@@ -56,6 +56,7 @@ fun TaskEntryBody(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
+
     val datePickerState = rememberDatePickerState()
     var selectedDate by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
@@ -96,191 +97,65 @@ fun TaskEntryBody(
                 }
             )
             HorizontalDivider(thickness = 1.dp, color = Color.Black)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clickable {
-                        showDatePicker = true
+            SelectorItem(
+                onClick = {
+                    showDatePicker = true
+                },
+                leadingIcon = LeadingIcon.VectorIcon(Icons.Default.DateRange),
+                leadingText = "Date",
+                trailingText = selectedDate.ifEmpty { "No Date" },
+                selector = {
+                    if (showDatePicker) {
+                        DatePickerModal(
+                            onDateSelected = { date ->
+                                selectedDate = date?.let { convertMillisToDate(it) } ?: "No date selected"
+                                onTaskValueChange(taskUiState.taskDetails.copy(dueDate = date))
+                            },
+                            onDismiss = { showDatePicker = false }
+                        )
                     }
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                    Text(
-                        text = "Date",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = selectedDate.ifEmpty { "No Date" },
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.padding_small),
-                                vertical = dimensionResource(id = R.dimen.padding_tiny)
-                            )
-                    )
-
                 }
-            }
+            )
             HorizontalDivider(
                 thickness = 1.dp,
                 color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clickable(enabled = selectedDate.isNotEmpty()) {
-                        // Handle click
-                    }
-                    .background(
-                        color = MaterialTheme.colorScheme.background
-                    )
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.clock),
-                        contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp),
-                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Text(
-                        text = "Set Time",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "No",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
-                                    alpha = 0.6f
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.padding_small),
-                                vertical = dimensionResource(id = R.dimen.padding_tiny)
-                            )
-                    )
-                }
-            }
+            SelectorItem(
+                onClick = { },
+                leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.clock)),
+                leadingText = "Set Time",
+                trailingText = "No",
+                selector = { },
+                enabled = selectedDate.isNotEmpty()
+            )
             HorizontalDivider(
                 thickness = 1.dp,
                 color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clickable(enabled = selectedDate.isNotEmpty()) {
-                        // Handle click
-                    }
-                    .background(
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
-                            alpha = 0.2f
-                        )
-                    )
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.repeat),
-                        contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp),
-                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Text(
-                        text = "Repeat Task",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "No",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
-                                    alpha = 0.6f
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.padding_small),
-                                vertical = dimensionResource(id = R.dimen.padding_tiny)
-                            )
-                    )
-                }
-            }
+            SelectorItem(
+                onClick = {
+                    // Handle click event if needed
+                },
+                leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.repeat)),
+                leadingText = "Repeat Task",
+                trailingText = "No",
+                selector = { },
+                enabled = selectedDate.isNotEmpty()
+            )
 
             HorizontalDivider(
                 thickness = 1.dp,
                 color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clickable(enabled = selectedDate.isNotEmpty()) {
-                        // Handle click
-                    }
-                    .background(
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
-                            alpha = 0.2f
-                        )
-                    )
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Select date",
-                        modifier = Modifier.padding(end = 16.dp),
-                        tint = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Text(
-                        text = "Alarm",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "5 minutes before",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .background(
-                                color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
-                                    alpha = 0.6f
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.padding_small),
-                                vertical = dimensionResource(id = R.dimen.padding_tiny)
-                            )
-                    )
-                }
-            }
+            SelectorItem(
+                onClick = { /*TODO*/ },
+                leadingIcon = LeadingIcon.VectorIcon(Icons.Default.Notifications),
+                leadingText = "Alarm",
+                trailingText = "Off",
+                selector = { },
+                enabled = selectedDate.isNotEmpty()
+            )
+
             HorizontalDivider(
                 thickness = 1.dp,
                 color = if (selectedDate.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
@@ -294,17 +169,6 @@ fun TaskEntryBody(
                     .padding(top = dimensionResource(id = R.dimen.padding_medium))
             )
         }
-
-        if (showDatePicker) {
-            DatePickerModal(
-                onDateSelected = { date ->
-                    selectedDate = date?.let { convertMillisToDate(it) } ?: "No date selected"
-                },
-                onDismiss = { showDatePicker = false }
-            )
-        }
-
-
         Button(
             onClick = onSaveClick,
             enabled = taskUiState.isEntryValid,
