@@ -23,6 +23,9 @@ class HomeViewModel(
 
     private val _selectedCategoryId = MutableStateFlow<Int?>(null) // Null means "All"
 
+    // StateFlow for the currently selected category ID
+    val selectedCategoryId: StateFlow<Int?> = _selectedCategoryId
+
     // Task list for the currently selected category or all tasks
     @OptIn(ExperimentalCoroutinesApi::class)
     val filteredTasks: StateFlow<List<Task>> = _selectedCategoryId.flatMapLatest { categoryId ->
@@ -73,6 +76,7 @@ class HomeViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 }
+
 
 
 /**

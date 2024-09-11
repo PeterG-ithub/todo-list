@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,25 +91,26 @@ object HomeDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navigateToTaskEntry: () -> Unit,
+    navigateToTaskEntry: (Category?) -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val homeUiState by homeViewModel.homeUiState.collectAsState()
+    val selectedCategoryId by homeViewModel.selectedCategoryId.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     // State for managing the visibility of the category entry modal
     val showCategoryEntryModal = remember { mutableStateOf(false) }
-
-    //
     var showDropdownMenu by remember { mutableStateOf(false) }
-
-    // State for managing the selected category
     val selectedCategory = remember { mutableStateOf<Category?>(null) }
 
-    // Observe the filtered task list from ViewModel
     val filteredTaskList by homeViewModel.filteredTasks.collectAsState()
+
+    // Update selected category state based on the ViewModel
+    LaunchedEffect(selectedCategoryId) {
+        selectedCategory.value = homeUiState.categoryList.find { it.id == selectedCategoryId }
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -131,9 +133,7 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = {
-                        showDropdownMenu = true
-                    }) {
+                    IconButton(onClick = { showDropdownMenu = true }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                     }
 
@@ -141,13 +141,13 @@ fun HomeScreen(
                         onDismissRequest = { showDropdownMenu = false },
                         showOptionMenu = showDropdownMenu,
                         onOptionSelected = { option ->
-                            when(option) {
+                            when (option) {
                                 "Add" -> {
                                     showDropdownMenu = false
                                     showCategoryEntryModal.value = true
                                 }
                                 "Manage" -> {
-
+                                    /* TODO: Maybe navigate to a new category screen */
                                 }
                                 "Delete" -> {
                                     selectedCategory.value?.let { category ->
@@ -157,7 +157,7 @@ fun HomeScreen(
                                     homeViewModel.selectCategory(null)
                                 }
                                 "Sort" -> {
-
+                                    /* TODO */
                                 }
                                 else -> {
                                     showDropdownMenu = false
@@ -171,7 +171,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = navigateToTaskEntry,
+                onClick = { navigateToTaskEntry(selectedCategory.value) },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .padding(
@@ -187,7 +187,7 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         HomeBody(
-            taskList = filteredTaskList, // Use the filtered task list here
+            taskList = filteredTaskList,
             onTaskClick = navigateToTaskUpdate,
             onTaskDeleteClick = { task ->
                 homeViewModel.deleteTask(task)
@@ -207,6 +207,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 @Composable
 private fun HomeTopAppBar(
