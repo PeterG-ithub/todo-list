@@ -29,7 +29,8 @@ object AppViewModelProvider {
         initializer {
             TaskEditViewModel(
                 this.createSavedStateHandle(),
-                todoApplication().container.tasksRepository)
+                todoApplication().container.tasksRepository,
+                todoApplication().container.categoryRepository)
         }
 
         initializer {
