@@ -13,4 +13,5 @@
     <string name="task_detail_title">Task detail</string>
     <string name="edit_task_title">Edit Task</string>
     <string name="category_entry_placeholder">Enter category here</string>
+    <string name="task_edit_title">Edit Task</string>
 </resources>
