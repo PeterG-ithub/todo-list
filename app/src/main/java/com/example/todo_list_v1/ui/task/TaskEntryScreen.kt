@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +34,14 @@ import kotlinx.coroutines.launch
 object TaskEntryDestination : NavigationDestination {
     override val route = "task_entry"
     override val titleRes = R.string.add_task
+    const val categoryIdArg = "taskId"
+    val routeWithArgs = "${TaskEntryDestination.route}/{$categoryIdArg}"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEntryScreen(
+    categoryId: Int?,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
@@ -45,6 +49,12 @@ fun TaskEntryScreen(
 ) {
     val categories by viewModel.categories.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(categoryId) {
+        val updatedTaskDetails = viewModel.taskUiState.taskDetails.copy(categoryId = categoryId)
+        viewModel.updateUiState(updatedTaskDetails) // Update taskUiState with the new categoryId
+    }
+
     Scaffold(
         topBar = {
             TodoTopAppBar(

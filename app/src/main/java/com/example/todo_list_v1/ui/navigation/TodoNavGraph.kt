@@ -26,14 +26,27 @@ fun TodoNavHost(
     ) {
         composable(route = HomeDestination.route) {
             HomeScreen(
-                navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
+                navigateToTaskEntry = { selectedCategory ->
+                    // Pass selectedCategory ID if it's not null
+                    navController.navigate(
+                        route = "${TaskEntryDestination.route}/${selectedCategory?.id ?: -1}"
+                    )
+                },
                 navigateToTaskUpdate = {
                     navController.navigate("${TaskEditDestination.route}/${it}")
                 }
             )
         }
-        composable(route = TaskEntryDestination.route) {
+        composable(
+            route = "${TaskEntryDestination.route}/{categoryId}",
+            arguments = listOf(navArgument("categoryId") {
+                type = NavType.IntType
+                defaultValue = -1 // Provide a default value to handle null
+            })
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getInt("categoryId")
             TaskEntryScreen(
+                categoryId = categoryId,
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )
