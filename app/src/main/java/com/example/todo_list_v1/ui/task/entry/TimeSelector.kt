@@ -21,6 +21,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,12 @@ fun TimeSelector(
 ) {
 
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedTimeMillis by remember { mutableStateOf<Long?>(null) }
+    var selectedTimeMillis by remember { mutableStateOf<Long?>(taskDetails.expectedStartTime) }
+
+    // Update selectedTimeMillis when taskDetails.expectedStartTime changes
+    LaunchedEffect(taskDetails.expectedStartTime) {
+        selectedTimeMillis = taskDetails.expectedStartTime
+    }
 
     SelectorItem(
         modifier = modifier,
@@ -178,7 +184,7 @@ fun AdvancedTimePickerDialog(
 
 fun convertTimeToMillis(hour: Int, minute: Int): Long? {
     val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, hour)
+    calendar.set(Calendar.HOUR_OF_DAY, hour)  // Use HOUR_OF_DAY to handle 24-hour format
     calendar.set(Calendar.MINUTE, minute)
     calendar.set(Calendar.SECOND, 0)
     calendar.set(Calendar.MILLISECOND, 0)
@@ -187,9 +193,10 @@ fun convertTimeToMillis(hour: Int, minute: Int): Long? {
 }
 
 fun convertMillisToTime(millis: Long): Pair<Int, Int> {
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = millis
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = millis
+    }
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)  // Use HOUR_OF_DAY to get 24-hour format hour
     val minute = calendar.get(Calendar.MINUTE)
     return Pair(hour, minute)
 }
@@ -198,10 +205,13 @@ fun formatTimeMillis(millis: Long): String {
     val calendar = Calendar.getInstance().apply {
         timeInMillis = millis
     }
-    val hour = calendar.get(Calendar.HOUR)
+    val hour = calendar.get(Calendar.HOUR)  // Use HOUR to get 12-hour format hour
     val minute = calendar.get(Calendar.MINUTE)
     val amPm = if (calendar.get(Calendar.AM_PM) == Calendar.AM) "AM" else "PM"
-    return String.format("%02d:%02d %s", hour, minute, amPm)
+
+    // Handle the case where hour might be 0 (i.e., 12 AM)
+    val displayHour = if (hour == 0) 12 else hour
+    return String.format("%02d:%02d %s", displayHour, minute, amPm)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
