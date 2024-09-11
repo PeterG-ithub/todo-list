@@ -40,7 +40,13 @@ fun SelectorItem(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp)
-            .clickable { onClick() }
+            .then(
+                if (enabled) {
+                    Modifier.clickable { onClick() }
+                } else {
+                    Modifier
+                }
+            )
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart
