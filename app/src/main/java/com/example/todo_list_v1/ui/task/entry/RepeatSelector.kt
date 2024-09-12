@@ -29,6 +29,10 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,8 +70,11 @@ fun RepeatSelectionModal(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
 ) {
-    val texts = listOf("Daily", "Weekly", "Monthly", "Yearly", )
+    val texts = listOf("Daily", "Weekly", "Monthly", "Yearly", "Custom")
     val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+    var isSwitchChecked by remember { mutableStateOf(true) }
+    var selectedRepeatOption by remember { mutableStateOf("Daily") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -88,8 +95,10 @@ fun RepeatSelectionModal(
                     Text(text = "Repeat Task", style = MaterialTheme.typography.headlineSmall)
                     Spacer(modifier = Modifier.weight(1f))
                     Switch(
-                        checked = false,
-                        onCheckedChange = { },
+                        checked = isSwitchChecked,
+                        onCheckedChange = { isChecked ->
+                            isSwitchChecked = isChecked
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.primary,
                             checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -110,28 +119,41 @@ fun RepeatSelectionModal(
                     texts.forEach { text ->
                         Box(
                             modifier = Modifier
+                                .clip(shape = RoundedCornerShape(size = 4.dp)) // Clip the whole Box to the shape
                                 .background(
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    shape = RoundedCornerShape(size = 4.dp)
+                                    color = if (selectedRepeatOption == text) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(size = 4.dp) // Background color with shape
                                 )
+                                .clickable {
+                                    selectedRepeatOption = text
+                                }
                                 .padding(
                                     vertical = dimensionResource(id = R.dimen.padding_small),
-                                    horizontal = 10.dp
+                                    horizontal = 10.dp // Apply padding inside the Box
                                 )
                         ) {
                             Text(
-                                text = text, // Display the different text for each Box
-                                style = MaterialTheme.typography.labelMedium
+                                text = text,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (selectedRepeatOption == text) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
                     Spacer(modifier = Modifier)
                 }
+                //Repeat every box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                        )
+                        .then(
+                            if (isSwitchChecked) {
+                                Modifier.clickable {  }
+                            } else {
+                                Modifier
+                            }
                         )
                         .padding(
                             vertical = 10.dp,
@@ -141,25 +163,33 @@ fun RepeatSelectionModal(
                     Row {
                         Text(
                             text = "Repeat every",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
                             text = "1 day",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = "Repeat every dropdown",
-                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            tint = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                     }
                 }
+                // Repeat ends at Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                        )
+                        .then(
+                            if (isSwitchChecked) {
+                                Modifier.clickable {  }
+                            } else {
+                                Modifier
+                            }
                         )
                         .padding(
                             vertical = 10.dp,
@@ -169,25 +199,26 @@ fun RepeatSelectionModal(
                     Row {
                         Text(
                             text = "Repeat ends at",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
                             text = "Endlessly",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = "Repeat every dropdown",
-                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            tint = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                     }
                 }
+                // Repeat On Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                         )
                         .padding(
                             vertical = 10.dp,
@@ -197,7 +228,7 @@ fun RepeatSelectionModal(
                     Row {
                         Text(
                             text = "Repeat on",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -206,7 +237,7 @@ fun RepeatSelectionModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                         )
                         .padding(
                             top = 4.dp,
@@ -226,20 +257,26 @@ fun RepeatSelectionModal(
                                     .clip(CircleShape) // Clip to CircleShape for clickable area
                                     .border(
                                         width = 1.dp, // Border width
-                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f), // Border color
+                                        color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                                         shape = CircleShape // Border shape
                                     )
                                     .background(
                                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0f),
                                         shape = CircleShape
                                     )
-                                    .clickable { /* Handle click */ },
+                                    .then(
+                                        if (isSwitchChecked && selectedRepeatOption == "Weekly") {
+                                            Modifier.clickable {  }
+                                        } else {
+                                            Modifier
+                                        }
+                                    ),
                                 contentAlignment = Alignment.Center // Center content in the Box
                             ) {
                                 Text(
                                     text = day,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                                    color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                                 )
                             }
                         }
