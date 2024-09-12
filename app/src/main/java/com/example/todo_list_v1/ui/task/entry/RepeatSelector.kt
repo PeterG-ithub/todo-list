@@ -93,15 +93,22 @@ fun RepeatSelectionModal(
 
     var isSwitchChecked by remember { mutableStateOf(true) }
     var selectedRepeatOption by remember { mutableStateOf("Daily") }
-    var selectedRepeatEveryOption by remember { mutableStateOf("Daily") }
     var showRepeatEveryDropdown by remember { mutableStateOf(false) }
 
+    var selectedRepeatEveryOption = when (selectedRepeatOption) {
+        "Daily" -> "1 day"
+        "Weekly" -> "1 week"
+        "Monthly" -> "1 month"
+        "Yearly" -> "1 year"
+        else -> ""
+    }
+
     val repeatUnit = when (selectedRepeatOption) {
-        "Daily" -> "Day"
-        "Weekly" -> "Week"
-        "Monthly" -> "Month"
-        "Yearly" -> "Year"
-        else -> "Custom"
+        "Daily" -> "day"
+        "Weekly" -> "week"
+        "Monthly" -> "month"
+        "Yearly" -> "year"
+        else -> ""
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -181,8 +188,7 @@ fun RepeatSelectionModal(
                         .then(
                             if (isSwitchChecked) {
                                 Modifier.clickable {
-                                    showRepeatEveryDropdown =
-                                        if (showRepeatEveryDropdown) false else true
+                                    showRepeatEveryDropdown = true
                                 }
                             } else {
                                 Modifier
@@ -208,7 +214,8 @@ fun RepeatSelectionModal(
                             onDismissRequest = { showRepeatEveryDropdown = false },
                             onItemSelected = { option ->
                                 selectedRepeatEveryOption = option
-                            }
+                            },
+                            selectedOption = repeatUnit
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
@@ -357,9 +364,10 @@ fun RepeatEveryDropdown(
     modifier: Modifier = Modifier,
     showMenu: Boolean,
     onDismissRequest: () -> Unit,
-    onItemSelected: (String) -> Unit
+    onItemSelected: (String) -> Unit,
+    selectedOption: String,
 ) {
-    val repeatOptions = listOf("1 day") + (2..365).map { "$it days" }
+    val repeatOptions = listOf("1 $selectedOption") + (2..365).map { "$it ${selectedOption}s" }
 
     if (showMenu) {
         Popup(
