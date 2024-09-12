@@ -6,21 +6,35 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,8 +54,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.zIndex
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.ui.task.TaskDetails
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
@@ -75,6 +93,16 @@ fun RepeatSelectionModal(
 
     var isSwitchChecked by remember { mutableStateOf(true) }
     var selectedRepeatOption by remember { mutableStateOf("Daily") }
+    var selectedRepeatEveryOption by remember { mutableStateOf("Daily") }
+    var showRepeatEveryDropdown by remember { mutableStateOf(false) }
+
+    val repeatUnit = when (selectedRepeatOption) {
+        "Daily" -> "Day"
+        "Weekly" -> "Week"
+        "Monthly" -> "Month"
+        "Yearly" -> "Year"
+        else -> "Custom"
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -146,11 +174,16 @@ fun RepeatSelectionModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.1f
+                            )
                         )
                         .then(
                             if (isSwitchChecked) {
-                                Modifier.clickable {  }
+                                Modifier.clickable {
+                                    showRepeatEveryDropdown =
+                                        if (showRepeatEveryDropdown) false else true
+                                }
                             } else {
                                 Modifier
                             }
@@ -167,8 +200,15 @@ fun RepeatSelectionModal(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
-                            text = "1 day",
+                            text = selectedRepeatEveryOption,
                             color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                        )
+                        RepeatEveryDropdown(
+                            showMenu = showRepeatEveryDropdown,
+                            onDismissRequest = { showRepeatEveryDropdown = false },
+                            onItemSelected = { option ->
+                                selectedRepeatEveryOption = option
+                            }
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
@@ -182,11 +222,13 @@ fun RepeatSelectionModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.1f
+                            )
                         )
                         .then(
                             if (isSwitchChecked) {
-                                Modifier.clickable {  }
+                                Modifier.clickable { }
                             } else {
                                 Modifier
                             }
@@ -203,7 +245,7 @@ fun RepeatSelectionModal(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
-                            text = "Endlessly",
+                            text = "Never",
                             color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Icon(
@@ -218,7 +260,9 @@ fun RepeatSelectionModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.1f
+                            )
                         )
                         .padding(
                             vertical = 10.dp,
@@ -237,7 +281,9 @@ fun RepeatSelectionModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.1f
+                            )
                         )
                         .padding(
                             top = 4.dp,
@@ -257,7 +303,9 @@ fun RepeatSelectionModal(
                                     .clip(CircleShape) // Clip to CircleShape for clickable area
                                     .border(
                                         width = 1.dp, // Border width
-                                        color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                                        color = if (isSwitchChecked && selectedRepeatOption == "Weekly") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(
+                                            alpha = 0.3f
+                                        ),
                                         shape = CircleShape // Border shape
                                     )
                                     .background(
@@ -266,7 +314,7 @@ fun RepeatSelectionModal(
                                     )
                                     .then(
                                         if (isSwitchChecked && selectedRepeatOption == "Weekly") {
-                                            Modifier.clickable {  }
+                                            Modifier.clickable { }
                                         } else {
                                             Modifier
                                         }
@@ -303,6 +351,54 @@ fun RepeatSelectionModal(
         }
     }
 }
+
+@Composable
+fun RepeatEveryDropdown(
+    modifier: Modifier = Modifier,
+    showMenu: Boolean,
+    onDismissRequest: () -> Unit,
+    onItemSelected: (String) -> Unit
+) {
+    val repeatOptions = listOf("1 day") + (2..365).map { "$it days" }
+
+    if (showMenu) {
+        Popup(
+            alignment = Alignment.TopEnd,
+            offset = IntOffset(x = 0, y = 64),
+            onDismissRequest = { onDismissRequest() }
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(Color.White)
+                    .border(1.dp, Color.Gray)
+                    .padding(vertical = 8.dp)
+                    .height(200.dp)
+                    .widthIn(max = 105.dp)
+            ) {
+                LazyColumn {
+                    items(repeatOptions) { option ->
+                        // Custom item layout
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onItemSelected(option)
+                                    onDismissRequest()
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding inside the item
+                        ) {
+                            Text(
+                                text = option,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 @Preview(showBackground = true)
 @Composable
