@@ -199,16 +199,32 @@ fun RepeatSelectionModal(
                             horizontal = 14.dp
                         )
                 ) {
-                    Row {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = "Repeat every",
                             color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = selectedRepeatEveryOption,
-                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                        ) {
+                            Text(
+                                text = selectedRepeatEveryOption,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = 10.dp,
+                                        vertical = 6.dp
+                                    )
+                            )
+                        }
                         RepeatEveryDropdown(
                             showMenu = showRepeatEveryDropdown,
                             onDismissRequest = { showRepeatEveryDropdown = false },
@@ -216,11 +232,6 @@ fun RepeatSelectionModal(
                                 selectedRepeatEveryOption = option
                             },
                             selectedOption = repeatUnit
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Repeat every dropdown",
-                            tint = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                     }
                 }
@@ -235,7 +246,9 @@ fun RepeatSelectionModal(
                         )
                         .then(
                             if (isSwitchChecked) {
-                                Modifier.clickable { }
+                                Modifier.clickable {
+
+                                }
                             } else {
                                 Modifier
                             }
@@ -245,21 +258,32 @@ fun RepeatSelectionModal(
                             horizontal = 14.dp
                         )
                 ) {
-                    Row {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = "Repeat ends at",
                             color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = "Never",
-                            color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Repeat every dropdown",
-                            tint = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                        ) {
+                            Text(
+                                text = "Never",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = 10.dp,
+                                        vertical = 6.dp
+                                    )
+                            )
+                        }
                     }
                 }
                 // Repeat On Box
@@ -372,7 +396,7 @@ fun RepeatEveryDropdown(
     if (showMenu) {
         Popup(
             alignment = Alignment.TopEnd,
-            offset = IntOffset(x = 0, y = 64),
+            offset = IntOffset(x = 0, y = 90),
             onDismissRequest = { onDismissRequest() }
         ) {
             Box(
