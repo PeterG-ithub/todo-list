@@ -1,6 +1,8 @@
 package com.example.todo_list_v1.ui.task.entry
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -17,12 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.ui.category.CategoryEntryModal
 import com.example.todo_list_v1.ui.task.TaskDetails
+import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 
 @Composable
 fun CategorySelector(
@@ -125,5 +129,13 @@ fun CategoryDropdown(
                 onAddCategoryClick()
             }
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CategorySelectorPreview() {
+    Todolistv1Theme {
+        CategorySelector(taskDetails = TaskDetails(), categories = listOf(Category(name = "Test")))
     }
 }
