@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -91,6 +92,7 @@ fun RepeatSelectionModal(
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<String?>(null)}
 
+    val toggleDayState = remember { mutableStateMapOf<String, Boolean>().apply { days.forEach { this[it] = false } } }
     var selectedRepeatEveryOption = when (selectedRepeatOption) {
         "Daily" -> "1 day"
         "Weekly" -> "1 week"
@@ -324,6 +326,7 @@ fun RepeatSelectionModal(
                         verticalAlignment = Alignment.CenterVertically // Center vertically if needed
                     ) {
                         days.forEach { day ->
+                            val isDaySelected = toggleDayState[day] ?: false
                             Box(
                                 modifier = Modifier
                                     .size(32.dp) // Fixed size for the Box
@@ -336,12 +339,14 @@ fun RepeatSelectionModal(
                                         shape = CircleShape // Border shape
                                     )
                                     .background(
-                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0f),
+                                        color = if (isDaySelected) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0f),
                                         shape = CircleShape
                                     )
                                     .then(
                                         if (isSwitchChecked && selectedRepeatOption == "Weekly") {
-                                            Modifier.clickable { }
+                                            Modifier.clickable {
+                                                toggleDayState[day] = !isDaySelected
+                                            }
                                         } else {
                                             Modifier
                                         }
