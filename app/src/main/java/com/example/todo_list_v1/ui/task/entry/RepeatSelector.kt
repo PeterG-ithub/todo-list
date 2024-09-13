@@ -1,47 +1,38 @@
 package com.example.todo_list_v1.ui.task.entry
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,15 +45,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.zIndex
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.ui.task.TaskDetails
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun RepeatSelector(
@@ -83,6 +75,7 @@ fun RepeatSelector(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RepeatSelectionModal(
     modifier: Modifier = Modifier,
@@ -92,8 +85,11 @@ fun RepeatSelectionModal(
     val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 
     var isSwitchChecked by remember { mutableStateOf(true) }
-    var selectedRepeatOption by remember { mutableStateOf("Daily") }
+    var selectedRepeatOption by remember { mutableStateOf("Weekly") }
     var showRepeatEveryDropdown by remember { mutableStateOf(false) }
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<String?>(null)}
 
     var selectedRepeatEveryOption = when (selectedRepeatOption) {
         "Daily" -> "1 day"
@@ -247,7 +243,7 @@ fun RepeatSelectionModal(
                         .then(
                             if (isSwitchChecked) {
                                 Modifier.clickable {
-
+                                    showDatePicker = true
                                 }
                             } else {
                                 Modifier
@@ -274,7 +270,7 @@ fun RepeatSelectionModal(
                                 )
                         ) {
                             Text(
-                                text = "Never",
+                                text = selectedDate ?: "Never",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
                                 modifier = Modifier
@@ -381,6 +377,14 @@ fun RepeatSelectionModal(
             }
         }
     }
+    if (showDatePicker) {
+        RepeatEndsAtModal(
+            onDismissRequest = { showDatePicker = false },
+            onDateSelected = { date ->
+                selectedDate = date
+            }
+        )
+    }
 }
 
 @Composable
@@ -430,13 +434,93 @@ fun RepeatEveryDropdown(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RepeatEndsAtModal(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    onDateSelected: (String) -> Unit
+) {
+    // Create a DatePickerState
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+
+                onDateSelected(convertMillisToDates(datePickerState.selectedDateMillis))
+                onDismissRequest()
+            }) {
+                Text("DONE")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                onDateSelected("Never")
+                onDismissRequest()
+            }) {
+                Box(
+                    modifier = Modifier
+                        .clip(
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .background(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "NEVER",
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+
+            }
+        },
+    ) {
+        DatePicker(
+            state = datePickerState,
+            title = {
+                Text(
+                    text ="Repeat End by",
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp)
+                )
+            },
+        )
+    }
+}
 
 
+fun convertMillisToDates(millis: Long?): String {
+    return if (millis != null) {
+        val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        return formatter.format(Date(millis))
+    } else {
+        "Never"
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun RepeatSelectionModalPreview() {
     Todolistv1Theme {
         Box(modifier = Modifier.fillMaxSize())
         RepeatSelectionModal()
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun RepeatEndsAtModalPreview() {
+    Todolistv1Theme {
+        Box(modifier = Modifier.fillMaxSize())
+        RepeatEndsAtModal(onDismissRequest = { /*TODO*/ }) {
+
+        }
     }
 }
