@@ -73,7 +73,7 @@ fun RepeatSelector(
         },
         leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.repeat)),
         leadingText = "Repeat Task",
-        trailingText = "No",
+        trailingText = getRepeatText(taskDetails),
         selector = {
             if (showRepeatModal) {
                 RepeatSelectionModal(
@@ -88,7 +88,51 @@ fun RepeatSelector(
         },
         enabled = enable
     )
+}
 
+fun getRepeatText(taskDetails: TaskDetails): String {
+    return when (taskDetails.repeatFrequency) {
+        "Daily" -> {
+            if (taskDetails.repeatInterval == 1) "Every day"
+            else "Every ${taskDetails.repeatInterval} days"
+        }
+        "Weekly" -> {
+            taskDetails.repeatOnDays?.let { days ->
+                val intervalText = if (taskDetails.repeatInterval == 1) "Every week"
+                else "Every ${taskDetails.repeatInterval} weeks"
+
+                if (days.isEmpty()) {
+                    intervalText // Return interval text alone if no specific days are selected
+                } else {
+                    // Get day names from indices and join them
+                    val dayNames = days.joinToString(", ") { getDayName(it) }
+                    "$intervalText on $dayNames" // Combine interval and days text
+                }
+            } ?: "Every week"
+        }
+        "Monthly" -> {
+            if (taskDetails.repeatInterval == 1) "Every month"
+            else "Every ${taskDetails.repeatInterval} months"
+        }
+        "Yearly" -> {
+            if (taskDetails.repeatInterval == 1) "Every year"
+            else "Every ${taskDetails.repeatInterval} years"
+        }
+        else -> "No"
+    }
+}
+
+fun getDayName(dayIndex: Int): String {
+    return when (dayIndex) {
+        0 -> "Sun"
+        1 -> "Mon"
+        2 -> "Tue"
+        3 -> "Wed"
+        4 -> "Thu"
+        5 -> "Fri"
+        6 -> "Sat"
+        else -> ""
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -107,7 +151,7 @@ fun RepeatSelectionModal(
     var showRepeatEveryDropdown by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    var repeatEndsAtDate by remember { mutableStateOf<String>(convertMillisToDates(taskDetails.repeatEndsAt) ?: "Never") }
+    var repeatEndsAtDate by remember { mutableStateOf(convertMillisToDates(taskDetails.repeatEndsAt)) }
 
     var selectedRepeatEveryOption = when (selectedRepeatOption) {
         "Daily" -> "${taskDetails.repeatInterval ?: 1} day${if (taskDetails.repeatInterval != 1) "s" else ""}"
@@ -402,22 +446,20 @@ fun RepeatSelectionModal(
                     TextButton(onClick = {
                         if (isSwitchChecked) {
                             val repeatInterval = selectedRepeatEveryOption.split(" ")[0].toIntOrNull()
-                            // Prepare repeatOnDays if Weekly is selected
-                            val repeatOnDays = if (selectedRepeatOption == "Weekly") {
-                                toggleDayState.filter { it.value }.keys.map { day ->
-                                    days.indexOf(day)
-                                }
+                            val selectedRepeatOnDays = if (selectedRepeatOption == "Weekly") {
+                                toggleDayState.filter { it.value }
+                                    .keys
+                                    .map { day -> days.indexOf(day) }
+                                    .sorted() // Sort indices in ascending order
                             } else null
 
-                            val repeatEndsAt = repeatEndsAtDate?.let { date ->
-                                convertDateToMillis(date)
-                            }
+                            val repeatEndsAt = convertDateToMillis(repeatEndsAtDate)
                             onValueChange(
                                 taskDetails.copy(
                                     repeatFrequency = selectedRepeatOption, // This should now have the correct value
                                     repeatInterval = repeatInterval,
                                     repeatEndsAt = repeatEndsAt,
-                                    repeatOnDays = repeatOnDays,
+                                    repeatOnDays = selectedRepeatOnDays,
                                     nextOccurrence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
                                 )
                             )
