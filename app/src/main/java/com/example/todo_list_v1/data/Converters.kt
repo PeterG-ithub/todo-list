@@ -10,6 +10,12 @@ class Converters {
 
     @TypeConverter
     fun fromStringToIntList(value: String?): List<Int>? {
-        return value?.split(",")?.map { it.toInt() }
+        return if (!value.isNullOrBlank()) {
+            value.split(",").mapNotNull {
+                it.trim().toIntOrNull() // Safely convert to Int, ignore if it's not a valid integer
+            }
+        } else {
+            emptyList() // Return an empty list if the input is null or blank
+        }
     }
 }
