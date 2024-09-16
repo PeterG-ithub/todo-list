@@ -54,9 +54,11 @@ import com.example.todo_list_v1.R
 import com.example.todo_list_v1.ui.task.TaskDetails
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RepeatSelector(
     modifier: Modifier = Modifier,
@@ -64,22 +66,37 @@ fun RepeatSelector(
     onValueChange: (TaskDetails) -> Unit = {},
     enable: Boolean = true,
 ) {
+    var showRepeatModal by remember { mutableStateOf(false)}
     SelectorItem(
         onClick = {
-            // Handle click event if needed
+            showRepeatModal = true
         },
         leadingIcon = LeadingIcon.PainterIcon(painterResource(id = R.drawable.repeat)),
         leadingText = "Repeat Task",
         trailingText = "No",
-        selector = { },
+        selector = {
+            if (showRepeatModal) {
+                RepeatSelectionModal(
+                    modifier = modifier,
+                    taskDetails = taskDetails,
+                    onValueChange = onValueChange,
+                    onDismiss = {
+                        showRepeatModal = false
+                    }
+                )
+            }
+        },
         enabled = enable
     )
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RepeatSelectionModal(
     modifier: Modifier = Modifier,
+    taskDetails: TaskDetails,
+    onValueChange: (TaskDetails) -> Unit = {},
     onDismiss: () -> Unit = {},
 ) {
     val texts = listOf("Daily", "Weekly", "Monthly", "Yearly", "Custom")
@@ -339,7 +356,9 @@ fun RepeatSelectionModal(
                                         shape = CircleShape // Border shape
                                     )
                                     .background(
-                                        color = if (isDaySelected) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0f),
+                                        color = if (isDaySelected) MaterialTheme.colorScheme.primaryContainer.copy(
+                                            alpha = 1f
+                                        ) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0f),
                                         shape = CircleShape
                                     )
                                     .then(
@@ -371,11 +390,46 @@ fun RepeatSelectionModal(
                         ),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = { /* Handle dismiss */ }) {
+                    TextButton(onClick = { onDismiss() }) {
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { /* Handle confirm */ }) {
+                    TextButton(onClick = {
+                        if (isSwitchChecked) {
+                            val repeatInterval = selectedRepeatEveryOption.split(" ")[0].toIntOrNull()
+
+                            // Prepare repeatOnDays if Weekly is selected
+                            val repeatOnDays = if (selectedRepeatOption == "Weekly") {
+                                toggleDayState.filter { it.value }.keys.map { day ->
+                                    days.indexOf(day)
+                                }
+                            } else null
+
+                            val repeatEndsAt = selectedDate?.let { date ->
+                                convertDateToMillis(date)
+                            }
+                            onValueChange(
+                                taskDetails.copy(
+                                    repeatFrequency = selectedRepeatOption.lowercase(),
+                                    repeatInterval = repeatInterval,
+                                    repeatEndsAt = repeatEndsAt,
+                                    repeatOnDays = repeatOnDays,
+                                    nextOccurrence = calculateNextOccurrence(taskDetails)
+                                )
+                            )
+                            onDismiss()
+                        } else {
+                            onValueChange(
+                                taskDetails.copy(
+                                    repeatFrequency = null,
+                                    repeatInterval = null,
+                                    repeatEndsAt = null,
+                                    repeatOnDays = null,
+                                    nextOccurrence = null
+                                )
+                            )
+                        }
+                    }) {
                         Text("OK")
                     }
                 }
@@ -507,6 +561,15 @@ fun convertMillisToDates(millis: Long?): String {
         "Never"
     }
 }
+fun convertDateToMillis(date: String): Long {
+    val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    return formatter.parse(date)?.time ?: System.currentTimeMillis() // Return current time if parsing fails
+}
+
+fun calculateNextOccurrence(taskDetails: TaskDetails): Long? {
+    return null
+}
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
@@ -514,7 +577,9 @@ fun convertMillisToDates(millis: Long?): String {
 fun RepeatSelectionModalPreview() {
     Todolistv1Theme {
         Box(modifier = Modifier.fillMaxSize())
-        RepeatSelectionModal()
+        RepeatSelectionModal(
+            taskDetails = TaskDetails()
+        )
     }
 }
 
