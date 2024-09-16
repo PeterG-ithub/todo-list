@@ -103,18 +103,17 @@ fun RepeatSelectionModal(
     val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 
     var isSwitchChecked by remember { mutableStateOf(true) }
-    var selectedRepeatOption by remember { mutableStateOf("Weekly") }
+    var selectedRepeatOption by remember { mutableStateOf(taskDetails.repeatFrequency ?: "Daily") }
     var showRepeatEveryDropdown by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<String?>(null)}
+    var repeatEndsAtDate by remember { mutableStateOf<String>(convertMillisToDates(taskDetails.repeatEndsAt) ?: "Never") }
 
-    val toggleDayState = remember { mutableStateMapOf<String, Boolean>().apply { days.forEach { this[it] = false } } }
     var selectedRepeatEveryOption = when (selectedRepeatOption) {
-        "Daily" -> "1 day"
-        "Weekly" -> "1 week"
-        "Monthly" -> "1 month"
-        "Yearly" -> "1 year"
+        "Daily" -> "${taskDetails.repeatInterval ?: 1} day${if (taskDetails.repeatInterval != 1) "s" else ""}"
+        "Weekly" -> "${taskDetails.repeatInterval ?: 1} week${if (taskDetails.repeatInterval != 1) "s" else ""}"
+        "Monthly" -> "${taskDetails.repeatInterval ?: 1} month${if (taskDetails.repeatInterval != 1) "s" else ""}"
+        "Yearly" -> "${taskDetails.repeatInterval ?: 1} year${if (taskDetails.repeatInterval != 1) "s" else ""}"
         else -> ""
     }
 
@@ -125,6 +124,12 @@ fun RepeatSelectionModal(
         "Yearly" -> "year"
         else -> ""
     }
+    val repeatOnDays = taskDetails.repeatOnDays ?: emptyList()
+    val toggleDayState = remember { mutableStateMapOf<String, Boolean>().apply {
+        days.forEachIndexed { index, day ->
+            this[day] = repeatOnDays.contains(index)
+        }
+    }}
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -289,7 +294,7 @@ fun RepeatSelectionModal(
                                 )
                         ) {
                             Text(
-                                text = selectedDate ?: "Never",
+                                text = repeatEndsAtDate,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (isSwitchChecked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
                                 modifier = Modifier
@@ -397,7 +402,6 @@ fun RepeatSelectionModal(
                     TextButton(onClick = {
                         if (isSwitchChecked) {
                             val repeatInterval = selectedRepeatEveryOption.split(" ")[0].toIntOrNull()
-
                             // Prepare repeatOnDays if Weekly is selected
                             val repeatOnDays = if (selectedRepeatOption == "Weekly") {
                                 toggleDayState.filter { it.value }.keys.map { day ->
@@ -405,19 +409,18 @@ fun RepeatSelectionModal(
                                 }
                             } else null
 
-                            val repeatEndsAt = selectedDate?.let { date ->
+                            val repeatEndsAt = repeatEndsAtDate?.let { date ->
                                 convertDateToMillis(date)
                             }
                             onValueChange(
                                 taskDetails.copy(
-                                    repeatFrequency = selectedRepeatOption.lowercase(),
+                                    repeatFrequency = selectedRepeatOption, // This should now have the correct value
                                     repeatInterval = repeatInterval,
                                     repeatEndsAt = repeatEndsAt,
                                     repeatOnDays = repeatOnDays,
-                                    nextOccurrence = calculateNextOccurrence(taskDetails)
+                                    nextOccurrence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
                                 )
                             )
-                            onDismiss()
                         } else {
                             onValueChange(
                                 taskDetails.copy(
@@ -429,6 +432,7 @@ fun RepeatSelectionModal(
                                 )
                             )
                         }
+                        onDismiss()
                     }) {
                         Text("OK")
                     }
@@ -440,7 +444,7 @@ fun RepeatSelectionModal(
         RepeatEndsAtModal(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
-                selectedDate = date
+                repeatEndsAtDate = date
             }
         )
     }
@@ -561,13 +565,79 @@ fun convertMillisToDates(millis: Long?): String {
         "Never"
     }
 }
-fun convertDateToMillis(date: String): Long {
+fun convertDateToMillis(date: String): Long? {
+    if (date == "Never") {
+        return null
+    }
     val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return formatter.parse(date)?.time ?: System.currentTimeMillis() // Return current time if parsing fails
 }
 
-fun calculateNextOccurrence(taskDetails: TaskDetails): Long? {
-    return null
+fun calculateNextOccurrence(
+    selectedRepeatOption: String?,
+    repeatInterval: Int?,
+    repeatEndsAt: Long?,
+    repeatOnDays: List<Int>?
+): Long? {
+    val calendar = Calendar.getInstance()
+
+    // Handle different repeat frequencies
+    val nextOccurrence = when (selectedRepeatOption?.lowercase()) {
+        "daily" -> calculateNextDailyOccurrence(calendar, repeatInterval ?: 1)
+        "weekly" -> calculateNextWeeklyOccurrence(calendar, repeatInterval ?: 1, repeatOnDays)
+        "monthly" -> calculateNextMonthlyOccurrence(calendar, repeatInterval ?: 1)
+        "yearly" -> calculateNextYearlyOccurrence(calendar, repeatInterval ?: 1)
+        else -> null
+    }
+
+    // If the next occurrence exceeds repeatEndsAt, return null
+    if (repeatEndsAt != null && nextOccurrence != null && nextOccurrence > repeatEndsAt) {
+        return null
+    }
+
+    return nextOccurrence
+}
+
+fun calculateNextDailyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
+    // Move the calendar forward by the interval in days
+    calendar.add(Calendar.DAY_OF_YEAR, repeatInterval)
+    return calendar.timeInMillis
+}
+
+fun calculateNextWeeklyOccurrence(calendar: Calendar, repeatInterval: Int, repeatOnDays: List<Int>?): Long {
+    if (repeatOnDays.isNullOrEmpty()) {
+        // If no specific days are selected, default to moving forward by weeks
+        calendar.add(Calendar.WEEK_OF_YEAR, repeatInterval)
+    } else {
+        // Move forward to the next valid day in repeatOnDays
+        val currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1 // Calendar.DAY_OF_WEEK starts from 1 (Sunday)
+        val sortedDays = repeatOnDays.sorted()
+
+        // Find the next day in the list after the current day
+        val nextDay = sortedDays.firstOrNull { it > currentDay } ?: sortedDays.first()
+
+        // Calculate days until the next occurrence
+        val daysToAdd = if (nextDay > currentDay) {
+            nextDay - currentDay
+        } else {
+            (7 - currentDay) + nextDay
+        }
+
+        calendar.add(Calendar.DAY_OF_YEAR, daysToAdd)
+    }
+    return calendar.timeInMillis
+}
+
+fun calculateNextMonthlyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
+    // Move the calendar forward by the interval in months
+    calendar.add(Calendar.MONTH, repeatInterval)
+    return calendar.timeInMillis
+}
+
+fun calculateNextYearlyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
+    // Move the calendar forward by the interval in years
+    calendar.add(Calendar.YEAR, repeatInterval)
+    return calendar.timeInMillis
 }
 
 
