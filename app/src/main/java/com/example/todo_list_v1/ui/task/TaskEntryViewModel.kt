@@ -80,7 +80,11 @@ data class TaskDetails(
     val isCompleted: Boolean = false,
     val dueDate: Long? = null,
     val reminderTime: Long? = null,
-    val repeatFrequency: String? = null,
+    val repeatFrequency: String? = null, // e.g., "daily", "weekly", "monthly", "yearly"
+    val repeatInterval: Int? = null, // e.g., 2 (for "every 2 days", "every 3 weeks", etc.)
+    val repeatEndsAt: Long? = null, // Timestamp when the repetition ends
+    val repeatOnDays: List<Int>? = null, // List of days for weekly custom repeat (0 = Sunday, 6 = Saturday)
+    val nextOccurrence: Long? = null, // Timestamp for the next occurrence (calculated)
     val priority: Int = 0,
     val tags: String? = null,
     val createdDate: Long = System.currentTimeMillis(),
@@ -90,11 +94,9 @@ data class TaskDetails(
     val totalTrackingTime: Long = 0,
     val expectedStartTime: Long? = null,
     val expectedStopTime: Long? = null,
-    val categoryId: Int? = null // Updated: Now categoryId instead of category
+    val categoryId: Int? = null
 )
-/**
- * Extension function to convert [TaskDetails] to [Task].
- */
+
 fun TaskDetails.toTask(): Task = Task(
     id = id,
     name = name,
@@ -103,6 +105,10 @@ fun TaskDetails.toTask(): Task = Task(
     dueDate = dueDate,
     reminderTime = reminderTime,
     repeatFrequency = repeatFrequency,
+    repeatInterval = repeatInterval,
+    repeatEndsAt = repeatEndsAt,
+    repeatOnDays = repeatOnDays,
+    nextOccurrence = nextOccurrence,
     priority = priority,
     tags = tags,
     createdDate = createdDate,
@@ -112,12 +118,9 @@ fun TaskDetails.toTask(): Task = Task(
     totalTrackingTime = totalTrackingTime,
     expectedStartTime = expectedStartTime,
     expectedStopTime = expectedStopTime,
-    categoryId = categoryId // Updated: categoryId field instead of category
+    categoryId = categoryId
 )
 
-/**
- * Extension function to convert [Task] to [TaskUiState]
- */
 fun Task.toTaskUiState(isEntryValid: Boolean = false): TaskUiState = TaskUiState(
     taskDetails = this.toTaskDetails(),
     isEntryValid = isEntryValid
@@ -131,6 +134,10 @@ fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     dueDate = dueDate,
     reminderTime = reminderTime,
     repeatFrequency = repeatFrequency,
+    repeatInterval = repeatInterval,
+    repeatEndsAt = repeatEndsAt,
+    repeatOnDays = repeatOnDays,
+    nextOccurrence = nextOccurrence,
     priority = priority,
     tags = tags,
     createdDate = createdDate,
@@ -140,5 +147,5 @@ fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     totalTrackingTime = totalTrackingTime,
     expectedStartTime = expectedStartTime,
     expectedStopTime = expectedStopTime,
-    categoryId = categoryId // Updated: categoryId field instead of category
+    categoryId = categoryId
 )
