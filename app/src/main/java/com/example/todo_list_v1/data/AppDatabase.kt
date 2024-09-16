@@ -68,7 +68,6 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // Add the new recurrence-related columns to the tasks table
-                database.execSQL("ALTER TABLE tasks ADD COLUMN repeatFrequency TEXT")
                 database.execSQL("ALTER TABLE tasks ADD COLUMN repeatInterval INTEGER")
                 database.execSQL("ALTER TABLE tasks ADD COLUMN repeatEndsAt INTEGER")
                 database.execSQL("ALTER TABLE tasks ADD COLUMN repeatOnDays TEXT")  // Store as a comma-separated string
