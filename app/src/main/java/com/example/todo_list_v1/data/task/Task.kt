@@ -26,7 +26,11 @@ data class Task(
     val isCompleted: Boolean = false,
     val dueDate: Long? = null, // Timestamp (milliseconds since epoch)
     val reminderTime: Long? = null, // Timestamp
-    val repeatFrequency: String? = null, // e.g., "daily", "weekly", "monthly"
+    val repeatFrequency: String? = null, // e.g., "daily", "weekly", "monthly", "yearly"
+    val repeatInterval: Int? = null, // e.g., 2 (for "every 2 days", "every 3 weeks", etc.)
+    val repeatEndsAt: Long? = null, // Timestamp when the repetition ends
+    val repeatOnDays: List<Int>? = null, // List of days for weekly custom repeat (0 = Sunday, 6 = Saturday)
+    val nextOccurrence: Long? = null, // Timestamp for the next occurrence (calculated)
     val priority: Int = 0, // e.g., 0 for low, 1 for medium, 2 for high
     val tags: String? = null, // Comma-separated tags or labels
     val createdDate: Long = System.currentTimeMillis(), // Timestamp
