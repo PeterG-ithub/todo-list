@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -94,6 +96,7 @@ fun SelectorItem(
                             horizontal = dimensionResource(id = R.dimen.padding_small),
                             vertical = dimensionResource(id = R.dimen.padding_tiny)
                         )
+                        .widthIn(max = 150.dp)
                 )
                 selector()
             }
@@ -114,7 +117,7 @@ fun SelectorItemPreview() {
             onClick = { },
             leadingIcon = LeadingIcon.VectorIcon(Icons.Default.List),
             leadingText = "Category",
-            trailingText = "No Category",
+            trailingText = "No Category Category Category Category ",
             enabled = false,
         )
     }
