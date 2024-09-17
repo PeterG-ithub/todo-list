@@ -1,5 +1,6 @@
 package com.example.todo_list_v1.ui.task
 
+import android.util.Log
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,9 +50,10 @@ fun TaskEntryScreen(
 ) {
     val categories by viewModel.categories.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val actualCategoryId = if (categoryId == -1) null else categoryId
 
     LaunchedEffect(categoryId) {
-        val updatedTaskDetails = viewModel.taskUiState.taskDetails.copy(categoryId = categoryId)
+        val updatedTaskDetails = viewModel.taskUiState.taskDetails.copy(categoryId = actualCategoryId)
         viewModel.updateUiState(updatedTaskDetails) // Update taskUiState with the new categoryId
     }
 
