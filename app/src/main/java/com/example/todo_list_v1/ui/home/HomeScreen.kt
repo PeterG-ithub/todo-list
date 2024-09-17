@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -230,61 +231,38 @@ private fun HomeTopAppBar(
         ) {
             item {
                 val isSelected = selectedCategory == null // "All" is selected when no category is
-                Text(
+                CategoryChip(
                     text = "All",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 12.sp,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .background(
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                        .clickable { onAllClick() }, // Call onAllClick when "All" is clicked
-                    textAlign = TextAlign.Center
+                    isSelected = isSelected,
+                    onClick = onAllClick
                 )
             }
             items(categories) { category ->
                 val isSelected = selectedCategory == category
-                Text(
+                CategoryChip(
                     text = category.name,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 12.sp,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .background(
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(
-                            horizontal = dimensionResource(id = R.dimen.padding_small),
-                            vertical = dimensionResource(id = R.dimen.padding_tiny)
-                        )
-                        .clickable { onCategoryClick(category) }
-                        .padding(horizontal = 8.dp, vertical = 0.dp),
-                    textAlign = TextAlign.Center
+                    isSelected = isSelected,
+                    onClick = { onCategoryClick(category) }
                 )
             }
             item {
-                Text(
-                    text = "Add Category +",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.primary,
+                Box(
                     modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
                         .background(
                             color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(8.dp),
-                        )
-                        .padding(
-                            horizontal = dimensionResource(id = R.dimen.padding_small),
-                            vertical = dimensionResource(id = R.dimen.padding_tiny)
                         )
                         .clickable { onCategoryEntryClick() }
-                        .padding(horizontal = 8.dp, vertical = 0.dp),
-                    textAlign = TextAlign.Center
-                )
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "Add Category +",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -389,14 +367,15 @@ private fun HomeBody(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
+        modifier = modifier
+            .padding(contentPadding),
     ) {
         if (taskList.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_tasks_here),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(contentPadding),
+                modifier = Modifier.padding(),
             )
         } else {
             TaskList(
@@ -422,7 +401,6 @@ private fun TaskList(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = contentPadding
     ) {
         items(items = taskList, key = { it.id }) { task ->
             TaskItem(
