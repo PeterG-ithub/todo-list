@@ -9,15 +9,19 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryDao
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskDao
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TaskDao
 
-@Database(entities = [Task::class, Category::class], version = 5, exportSchema = false)
+@Database(entities = [Task::class, Category::class, CompletedTask::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
     abstract fun categoryDao(): CategoryDao
+    abstract fun completedTaskDao(): CompletedTaskDao
+
     companion object {
         @Volatile
         private var Instance: AppDatabase? = null
@@ -30,8 +34,8 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE tasks ADD COLUMN category TEXT")
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE tasks ADD COLUMN category TEXT")
             }
         }
 
@@ -40,24 +44,24 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE tasks ADD COLUMN categoryId INTEGER")
                 database.execSQL(
                     """
-            CREATE TABLE IF NOT EXISTS `categories` (
-                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                `name` TEXT NOT NULL,
-                `description` TEXT,
-                `color` TEXT,
-                `icon` TEXT,
-                `createdDate` INTEGER NOT NULL,
-                `lastUpdated` INTEGER NOT NULL,
-                `isArchived` INTEGER NOT NULL DEFAULT 0
-            )
-            """
+                    CREATE TABLE IF NOT EXISTS `categories` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `description` TEXT,
+                        `color` TEXT,
+                        `icon` TEXT,
+                        `createdDate` INTEGER NOT NULL,
+                        `lastUpdated` INTEGER NOT NULL,
+                        `isArchived` INTEGER NOT NULL DEFAULT 0
+                    )
+                    """
                 )
 
                 // Add index for the new column
                 database.execSQL(
                     """
-            CREATE INDEX IF NOT EXISTS `index_tasks_categoryId` ON `tasks` (`categoryId`)
-            """
+                    CREATE INDEX IF NOT EXISTS `index_tasks_categoryId` ON `tasks` (`categoryId`)
+                    """
                 )
 
                 // Optionally, you can manually enforce foreign key constraints with SQL commands here
@@ -75,10 +79,30 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create the completed_tasks table
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `completed_tasks` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `taskId` INTEGER,
+                        `taskName` TEXT NOT NULL,
+                        `taskDescription` TEXT,
+                        `taskCategory` TEXT,
+                        `taskDueDate` INTEGER,
+                        `completedAt` INTEGER NOT NULL,
+                        FOREIGN KEY(`taskId`) REFERENCES `tasks`(`id`) ON DELETE SET NULL
+                    )
+                    """
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, AppDatabase::class.java, "app_database")
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5) // Add new migration
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6) // Add new migration
                     .build()
                     .also { Instance = it }
             }
