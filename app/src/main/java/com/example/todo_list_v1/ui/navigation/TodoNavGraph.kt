@@ -37,8 +37,9 @@ fun TodoNavHost(
                 navigateToTaskUpdate = {
                     navController.navigate("${TaskEditDestination.route}/${it}")
                 },
-                navigateToCompletedTask =  {
-                    navController.navigate("${CompletedTaskDestination.route}/${it}")
+                navigateToCompletedTask =  { selectedCategory ->
+
+                    navController.navigate("${CompletedTaskDestination.route}/${selectedCategory?.id}")
                 },
             )
         }
