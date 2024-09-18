@@ -51,7 +51,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -88,6 +90,7 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToTaskEntry: (Category?) -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
+    navigateToCompletedTask: (Category?) -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -192,8 +195,8 @@ fun HomeScreen(
             },
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
+            onViewCompletedTaskClick = { navigateToCompletedTask(selectedCategory.value) }
         )
-
         if (showCategoryEntryModal.value) {
             CategoryEntryModal(
                 onDismiss = { showCategoryEntryModal.value = false },
@@ -358,7 +361,8 @@ private fun HomeBody(
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onTaskDeleteClick: (Task) -> Unit = { }
+    onTaskDeleteClick: (Task) -> Unit = { },
+    onViewCompletedTaskClick: () -> Unit = { },
 ) {
     var showNoDueDateTasks by remember { mutableStateOf(true) }
     var showTodayTasks by remember { mutableStateOf(true) }
@@ -434,6 +438,13 @@ private fun HomeBody(
             onTaskDeleteClick = onTaskDeleteClick,
             contentPadding = contentPadding
         )
+        Text(
+            text = "View all completed task",
+            style = TextStyle(textDecoration = TextDecoration.Underline),
+            modifier = Modifier
+                .padding(top = dimensionResource(id = R.dimen.padding_medium))
+                .clickable { onViewCompletedTaskClick() }
+        )
     }
 }
 
@@ -452,6 +463,7 @@ fun millisToLocalDate(millis: Long, zone: ZoneId = ZoneId.systemDefault()): Loca
 fun HomeScreenPreview_NoTasks() {
     HomeScreen(
         navigateToTaskEntry = {},
+        navigateToCompletedTask = {},
         navigateToTaskUpdate = {},
         homeViewModel = HomeViewModel(
             tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
@@ -467,6 +479,7 @@ fun HomeScreenPreview_WithTasks() {
     HomeScreen(
         navigateToTaskEntry = {},
         navigateToTaskUpdate = {},
+        navigateToCompletedTask = {},
         homeViewModel = HomeViewModel(
             tasksRepository = TasksRepositoryMock(listOf(
                 Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),

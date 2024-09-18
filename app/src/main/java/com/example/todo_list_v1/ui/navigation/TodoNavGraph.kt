@@ -34,7 +34,10 @@ fun TodoNavHost(
                 },
                 navigateToTaskUpdate = {
                     navController.navigate("${TaskEditDestination.route}/${it}")
-                }
+                },
+                navigateToCompletedTask =  {
+
+                },
             )
         }
         composable(
