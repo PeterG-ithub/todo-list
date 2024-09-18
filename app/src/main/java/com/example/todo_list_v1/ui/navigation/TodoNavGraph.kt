@@ -7,6 +7,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.todo_list_v1.ui.completed_task.CompletedTaskDestination
+import com.example.todo_list_v1.ui.completed_task.CompletedTaskScreen
 import com.example.todo_list_v1.ui.home.HomeDestination
 import com.example.todo_list_v1.ui.home.HomeScreen
 import com.example.todo_list_v1.ui.task.TaskEditDestination
@@ -36,7 +38,7 @@ fun TodoNavHost(
                     navController.navigate("${TaskEditDestination.route}/${it}")
                 },
                 navigateToCompletedTask =  {
-
+                    navController.navigate("${CompletedTaskDestination.route}/${it}")
                 },
             )
         }
@@ -63,6 +65,20 @@ fun TodoNavHost(
             TaskEditScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(
+            route = CompletedTaskDestination.routeWithArgs,
+            arguments = listOf(navArgument(CompletedTaskDestination.categoryIdArg) {
+                type = NavType.StringType // Use StringType for nullable arguments
+                nullable = true // Allow null values
+            })
+        ) {
+            // Retrieve the argument from the NavBackStackEntry
+            val categoryIdArg = it.arguments?.getString(CompletedTaskDestination.categoryIdArg)?.toIntOrNull()
+
+            CompletedTaskScreen(
+                categoryId = categoryIdArg
             )
         }
     }
