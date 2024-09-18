@@ -1,22 +1,20 @@
 package com.example.todo_list_v1.ui.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,15 +24,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,12 +41,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -72,8 +63,6 @@ import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.category.CategoryEntryModal
-import com.example.todo_list_v1.ui.category.CategoryUiState
-import com.example.todo_list_v1.ui.category.CategoryViewModel
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.task.item.TaskItem
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
@@ -81,7 +70,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 
 object HomeDestination : NavigationDestination {
@@ -356,6 +347,7 @@ fun MoreOptionDropdown(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun HomeBody(
     taskList: List<Task>,
@@ -365,21 +357,28 @@ private fun HomeBody(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onTaskDeleteClick: (Task) -> Unit = { }
 ) {
+    val today = LocalDate.now()
+    val tomorrow = today.plusDays(1)
+
+// Convert task.dueDate (in millis) to LocalDate
+    val noDueDateTasks = taskList.filter { it.dueDate == null }
+    val pastDueTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it).isBefore(today) } == true }
+    val todayTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == today }
+    val tomorrowTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == tomorrow }
+    val futureTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it).isAfter(tomorrow) } == true }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(contentPadding),
+        modifier = modifier.padding(contentPadding),
     ) {
-        if (taskList.isEmpty()) {
+        // Display "Past Due" tasks
+        if (pastDueTasks.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.no_tasks_here),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(),
+                text = stringResource(R.string.past_due),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
-        } else {
             TaskList(
-                taskList = taskList,
+                taskList = pastDueTasks,
                 onTaskClick = { onTaskClick(it.id) },
                 onTaskDeleteClick = onTaskDeleteClick,
                 onTaskCheckedChange = onTaskCheckedChange,
@@ -387,7 +386,91 @@ private fun HomeBody(
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
         }
+        // Display "No Due Date" tasks
+        if (noDueDateTasks.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.no_due_date),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            TaskList(
+                taskList = noDueDateTasks,
+                onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                contentPadding = contentPadding,
+                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+
+        // Display "Today" tasks
+        if (todayTasks.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.today),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            TaskList(
+                taskList = todayTasks,
+                onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                contentPadding = contentPadding,
+                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+
+        // Display "Tomorrow" tasks
+        if (tomorrowTasks.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.tomorrow),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            TaskList(
+                taskList = tomorrowTasks,
+                onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                contentPadding = contentPadding,
+                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+
+        // Display "Future" tasks
+        if (futureTasks.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.future),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            TaskList(
+                taskList = futureTasks,
+                onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                contentPadding = contentPadding,
+                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+
+        // If no tasks at all, show "No tasks here"
+        if (taskList.isEmpty()) {
+            Text(
+                text = stringResource(R.string.no_tasks_here),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(),
+            )
+        }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun millisToLocalDate(millis: Long, zone: ZoneId = ZoneId.systemDefault()): LocalDate {
+    return Instant.ofEpochMilli(millis)
+        .atZone(zone) // Convert Instant to ZonedDateTime in the given time zone
+        .toLocalDate() // Extract the LocalDate part
 }
 
 @Composable

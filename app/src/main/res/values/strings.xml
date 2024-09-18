@@ -14,4 +14,9 @@
     <string name="edit_task_title">Edit Task</string>
     <string name="category_entry_placeholder">Enter category here</string>
     <string name="task_edit_title">Edit Task</string>
+    <string name="no_due_date">No due date</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="future">Future</string>
+    <string name="past_due">Past</string>
 </resources>
