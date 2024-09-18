@@ -66,6 +66,7 @@ import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.category.CategoryEntryModal
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.task.item.TaskItem
+import com.example.todo_list_v1.ui.task.list.TaskSection
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -436,43 +437,6 @@ private fun HomeBody(
     }
 }
 
-@Composable
-fun TaskSection(
-    title: String,
-    taskList: List<Task>,
-    isExpanded: Boolean,
-    onToggleExpand: () -> Unit,
-    onTaskClick: (Int) -> Unit,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
-    onTaskDeleteClick: (Task) -> Unit,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
-    modifier: Modifier = Modifier
-) {
-    if (taskList.isNotEmpty()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onToggleExpand() }
-                .padding(vertical = 8.dp)
-        ) {
-            Text(
-                text = "$title (${taskList.size})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        if (isExpanded) {
-            TaskList(
-                taskList = taskList,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
-        }
-    }
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun millisToLocalDate(millis: Long, zone: ZoneId = ZoneId.systemDefault()): LocalDate {
@@ -481,51 +445,6 @@ fun millisToLocalDate(millis: Long, zone: ZoneId = ZoneId.systemDefault()): Loca
         .toLocalDate() // Extract the LocalDate part
 }
 
-@Composable
-private fun TaskList(
-    taskList: List<Task>,
-    onTaskClick: (Task) -> Unit,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
-    contentPadding: PaddingValues,
-    modifier: Modifier = Modifier,
-    onTaskDeleteClick: (Task) -> Unit = { }
-) {
-    LazyColumn(
-        modifier = modifier,
-    ) {
-        items(items = taskList, key = { it.id }) { task ->
-            TaskItem(
-                task = task,
-                onTaskCheckedChange = { isChecked ->
-                    onTaskCheckedChange(task, isChecked)
-                },
-                onDeleteClick = { onTaskDeleteClick(task) },
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_tiny))
-                    .clickable { onTaskClick(task) }
-            )
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun TaskListPreview() {
-    Todolistv1Theme {
-        TaskList(
-            taskList = listOf(
-                Task(id = 1, name = "Sample Task 1", description = "This is a sample task description.", isCompleted = false),
-                Task(id = 2, name = "Sample Task 2", description = "This is another task description.", isCompleted = true)
-            ),
-            onTaskClick = { /* Handle task click */ },
-            onTaskCheckedChange = { task, isChecked ->
-                // Handle checkbox state change
-            },
-            contentPadding = PaddingValues(8.dp)
-        )
-    }
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
