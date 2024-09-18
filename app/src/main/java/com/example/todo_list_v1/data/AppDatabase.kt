@@ -14,7 +14,7 @@ import com.example.todo_list_v1.data.completed_task.CompletedTaskDao
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TaskDao
 
-@Database(entities = [Task::class, Category::class, CompletedTask::class], version = 6, exportSchema = false)
+@Database(entities = [Task::class, Category::class, CompletedTask::class], version = 7, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -99,10 +99,41 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Rename the existing table to a temporary table
+                database.execSQL("ALTER TABLE completed_tasks RENAME TO completed_tasks_temp")
+
+                // Create a new table with the updated schema
+                database.execSQL("""
+            CREATE TABLE completed_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                taskId INTEGER,
+                taskName TEXT NOT NULL,
+                taskDescription TEXT,
+                taskCategory TEXT,
+                taskDueDate INTEGER,
+                completedAt INTEGER NOT NULL,
+                FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE SET NULL
+            )
+        """)
+
+                // Copy data from the old table to the new table
+                database.execSQL("""
+            INSERT INTO completed_tasks (id, taskId, taskName, taskDescription, taskCategory, taskDueDate, completedAt)
+            SELECT id, taskId, taskName, taskDescription, taskCategory, taskDueDate, completedAt
+            FROM completed_tasks_temp
+        """)
+
+                // Drop the old table
+                database.execSQL("DROP TABLE completed_tasks_temp")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, AppDatabase::class.java, "app_database")
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6) // Add new migration
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                     .also { Instance = it }
             }

@@ -18,7 +18,7 @@ import com.example.todo_list_v1.data.task.Task
 data class CompletedTask(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val taskId: Int,
+    val taskId: Int? = null,
     val taskName: String,
     val taskDescription: String? = null,
     val taskCategory: String? = null,
