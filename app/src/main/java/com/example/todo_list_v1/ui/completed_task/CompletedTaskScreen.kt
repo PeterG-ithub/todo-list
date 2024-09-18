@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -12,9 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.TodoTopAppBar
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
+import com.example.todo_list_v1.ui.AppViewModelProvider
+import com.example.todo_list_v1.ui.home.CompletedTaskRepositoryMock
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
+import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 
 object CompletedTaskDestination : NavigationDestination {
     override val route = "completed_task"
@@ -30,6 +38,7 @@ fun CompletedTaskScreen(
     canNavigateBack: Boolean = true,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
+    viewModel: CompletedTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
         topBar = {
@@ -49,6 +58,24 @@ fun CompletedTaskScreen(
                 end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
             )
         )
+        Text(
+            "Hello"
+        )
     }
 
+}
+
+@Preview
+@Composable
+fun CompletedTaskScreenPreview() {
+    Todolistv1Theme {
+        CompletedTaskScreen(
+            categoryId = null,
+            navigateBack = { /*TODO*/ },
+            onNavigateUp = { /*TODO*/ },
+            viewModel = CompletedTaskViewModel(
+                CompletedTaskRepositoryMock()
+            )
+        )
+    }
 }
