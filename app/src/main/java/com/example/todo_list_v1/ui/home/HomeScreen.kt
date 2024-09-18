@@ -380,71 +380,79 @@ private fun HomeBody(
     val tomorrowTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == tomorrow }
     val futureTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it).isAfter(tomorrow) } == true }
 
-    Column(
+    LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.padding(contentPadding)
     ) {
-        TaskSection(
-            title = stringResource(R.string.past_due),
-            taskList = pastDueTasks,
-            isExpanded = showPastDueTasks,
-            onToggleExpand = { showPastDueTasks = !showPastDueTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.no_due_date),
-            taskList = noDueDateTasks,
-            isExpanded = showNoDueDateTasks,
-            onToggleExpand = { showNoDueDateTasks = !showNoDueDateTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.today),
-            taskList = todayTasks,
-            isExpanded = showTodayTasks,
-            onToggleExpand = { showTodayTasks = !showTodayTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.tomorrow),
-            taskList = tomorrowTasks,
-            isExpanded = showTomorrowTasks,
-            onToggleExpand = { showTomorrowTasks = !showTomorrowTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.future),
-            taskList = futureTasks,
-            isExpanded = showFutureTasks,
-            onToggleExpand = { showFutureTasks = !showFutureTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-        Text(
-            text = "View all completed task",
-            style = TextStyle(textDecoration = TextDecoration.Underline),
-            modifier = Modifier
-                .padding(top = dimensionResource(id = R.dimen.padding_medium))
-                .clickable { onViewCompletedTaskClick() }
-        )
+        item {
+            TaskSection(
+                title = stringResource(R.string.past_due),
+                taskList = pastDueTasks,
+                isExpanded = showPastDueTasks,
+                onToggleExpand = { showPastDueTasks = !showPastDueTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.no_due_date),
+                taskList = noDueDateTasks,
+                isExpanded = showNoDueDateTasks,
+                onToggleExpand = { showNoDueDateTasks = !showNoDueDateTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.today),
+                taskList = todayTasks,
+                isExpanded = showTodayTasks,
+                onToggleExpand = { showTodayTasks = !showTodayTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.tomorrow),
+                taskList = tomorrowTasks,
+                isExpanded = showTomorrowTasks,
+                onToggleExpand = { showTomorrowTasks = !showTomorrowTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.future),
+                taskList = futureTasks,
+                isExpanded = showFutureTasks,
+                onToggleExpand = { showFutureTasks = !showFutureTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            Text(
+                text = "View all completed task",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .padding(top = dimensionResource(id = R.dimen.padding_medium))
+                    .clickable { onViewCompletedTaskClick() }
+            )
+        }
     }
 }
 
