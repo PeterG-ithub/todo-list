@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryRepository
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val tasksRepository: TasksRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val completedTaskRepository: CompletedTaskRepository
 ) : ViewModel() {
 
     private val _selectedCategoryId = MutableStateFlow<Int?>(null) // Null means "All"
@@ -69,6 +72,23 @@ class HomeViewModel(
         viewModelScope.launch {
             val updatedTask = task.copy(isCompleted = isCompleted)
             tasksRepository.updateTask(updatedTask)
+
+            if (isCompleted) {
+                // Create a new CompletedTask from the completed Task
+                val completedTask = CompletedTask(
+                    taskId = task.id,
+                    taskName = task.name,
+                    taskDescription = task.description,
+                    taskDueDate = task.dueDate,
+                    completedAt = System.currentTimeMillis()
+                )
+                completedTaskRepository.insertCompletedTask(completedTask)
+            }
+
+            if (task.nextOccurrence == null) {
+                // If no next occurrence, delete the task
+                tasksRepository.deleteTask(updatedTask)
+            }
         }
     }
 
