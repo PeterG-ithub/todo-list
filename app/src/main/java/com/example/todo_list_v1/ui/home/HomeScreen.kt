@@ -62,6 +62,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryRepository
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
@@ -475,7 +477,8 @@ fun HomeScreenPreview_NoTasks() {
         navigateToTaskUpdate = {},
         homeViewModel = HomeViewModel(
             tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
-            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock(), // Replace with a mock or test repository
+            completedTaskRepository = CompletedTaskRepositoryMock()
         )
     )
 }
@@ -496,7 +499,8 @@ fun HomeScreenPreview_WithTasks() {
             categoryRepository = CategoryRepositoryMock(listOf(
                 Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
                 Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
-            )) // Replace with a mock or test repository
+            )), // Replace with a mock or test repository
+            completedTaskRepository = CompletedTaskRepositoryMock()
         ),
     )
 }
@@ -603,5 +607,38 @@ class CategoryRepositoryMock(
             if (it.id == categoryId) it.copy(isArchived = true) else it
         }
         categoriesFlow.value = updatedList
+    }
+}
+
+class CompletedTaskRepositoryMock(
+    private val completedTasks: List<CompletedTask> = emptyList()
+) : CompletedTaskRepository {
+
+    private val completedTasksFlow = MutableStateFlow(completedTasks)
+
+    override fun getAllCompletedTasksStream(): Flow<List<CompletedTask>> = completedTasksFlow
+
+    override fun getCompletedTasksByTaskIdStream(taskId: Int): Flow<List<CompletedTask>> {
+        return completedTasksFlow.map { tasks -> tasks.filter { it.taskId == taskId } }
+    }
+
+    override fun getCompletedTaskStream(id: Int): Flow<CompletedTask?> {
+        return completedTasksFlow.map { tasks -> tasks.find { it.id == id } }
+    }
+
+    override suspend fun insertCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun updateCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun deleteCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun deleteAllCompletedTasks() {
+        // Not implemented for mock
     }
 }
