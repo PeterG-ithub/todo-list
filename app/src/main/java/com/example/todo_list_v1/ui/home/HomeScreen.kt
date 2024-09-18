@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -80,6 +81,7 @@ object HomeDestination : NavigationDestination {
     override val titleRes = R.string.app_name
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -357,6 +359,12 @@ private fun HomeBody(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onTaskDeleteClick: (Task) -> Unit = { }
 ) {
+    var showNoDueDateTasks by remember { mutableStateOf(true) }
+    var showTodayTasks by remember { mutableStateOf(true) }
+    var showTomorrowTasks by remember { mutableStateOf(true) }
+    var showFutureTasks by remember { mutableStateOf(true) }
+    var showPastDueTasks by remember { mutableStateOf(true) }
+
     val today = LocalDate.now()
     val tomorrow = today.plusDays(1)
 
@@ -366,102 +374,139 @@ private fun HomeBody(
     val todayTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == today }
     val tomorrowTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == tomorrow }
     val futureTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it).isAfter(tomorrow) } == true }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(contentPadding),
+        modifier = modifier.padding(contentPadding)
     ) {
         // Display "Past Due" tasks
         if (pastDueTasks.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.past_due),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            TaskList(
-                taskList = pastDueTasks,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showPastDueTasks = !showPastDueTasks }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "${stringResource(R.string.past_due)} (${pastDueTasks.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showPastDueTasks) {
+                TaskList(
+                    taskList = pastDueTasks,
+                    onTaskClick = { onTaskClick(it.id) },
+                    onTaskDeleteClick = onTaskDeleteClick,
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    contentPadding = contentPadding,
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
+
         // Display "No Due Date" tasks
         if (noDueDateTasks.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.no_due_date),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            TaskList(
-                taskList = noDueDateTasks,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showNoDueDateTasks = !showNoDueDateTasks }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "${stringResource(R.string.no_due_date)} (${noDueDateTasks.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showNoDueDateTasks) {
+                TaskList(
+                    taskList = noDueDateTasks,
+                    onTaskClick = { onTaskClick(it.id) },
+                    onTaskDeleteClick = onTaskDeleteClick,
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    contentPadding = contentPadding,
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
 
         // Display "Today" tasks
         if (todayTasks.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.today),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            TaskList(
-                taskList = todayTasks,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTodayTasks = !showTodayTasks }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "${stringResource(R.string.today)} (${todayTasks.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showTodayTasks) {
+                TaskList(
+                    taskList = todayTasks,
+                    onTaskClick = { onTaskClick(it.id) },
+                    onTaskDeleteClick = onTaskDeleteClick,
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    contentPadding = contentPadding,
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
 
         // Display "Tomorrow" tasks
         if (tomorrowTasks.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.tomorrow),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            TaskList(
-                taskList = tomorrowTasks,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTomorrowTasks = !showTomorrowTasks }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "${stringResource(R.string.tomorrow)} (${tomorrowTasks.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showTomorrowTasks) {
+                TaskList(
+                    taskList = tomorrowTasks,
+                    onTaskClick = { onTaskClick(it.id) },
+                    onTaskDeleteClick = onTaskDeleteClick,
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    contentPadding = contentPadding,
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
 
         // Display "Future" tasks
         if (futureTasks.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.future),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            TaskList(
-                taskList = futureTasks,
-                onTaskClick = { onTaskClick(it.id) },
-                onTaskDeleteClick = onTaskDeleteClick,
-                onTaskCheckedChange = onTaskCheckedChange,
-                contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-            )
-        }
-
-        // If no tasks at all, show "No tasks here"
-        if (taskList.isEmpty()) {
-            Text(
-                text = stringResource(R.string.no_tasks_here),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(),
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showFutureTasks = !showFutureTasks }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "${stringResource(R.string.future)} (${futureTasks.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showFutureTasks) {
+                TaskList(
+                    taskList = futureTasks,
+                    onTaskClick = { onTaskClick(it.id) },
+                    onTaskDeleteClick = onTaskDeleteClick,
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    contentPadding = contentPadding,
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
     }
 }
@@ -519,6 +564,7 @@ fun TaskListPreview() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview_NoTasks() {
@@ -532,6 +578,7 @@ fun HomeScreenPreview_NoTasks() {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview_WithTasks() {
