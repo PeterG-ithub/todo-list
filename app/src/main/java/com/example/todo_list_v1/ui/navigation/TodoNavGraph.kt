@@ -78,7 +78,9 @@ fun TodoNavHost(
             val categoryIdArg = it.arguments?.getString(CompletedTaskDestination.categoryIdArg)?.toIntOrNull()
 
             CompletedTaskScreen(
-                categoryId = categoryIdArg
+                categoryId = categoryIdArg,
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() },
             )
         }
     }

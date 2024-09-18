@@ -26,13 +26,17 @@ object CompletedTaskDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompletedTaskScreen(
-    categoryId: Int?
+    categoryId: Int?,
+    canNavigateBack: Boolean = true,
+    navigateBack: () -> Unit,
+    onNavigateUp: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             TodoTopAppBar(
                 title = stringResource(id = R.string.completed_task_title),
-                canNavigateBack = true
+                canNavigateBack = canNavigateBack,
+                navigateUp = onNavigateUp
             )
         }
     ) { innerPadding ->
