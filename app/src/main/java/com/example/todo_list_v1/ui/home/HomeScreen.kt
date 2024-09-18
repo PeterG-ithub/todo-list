@@ -379,134 +379,97 @@ private fun HomeBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.padding(contentPadding)
     ) {
-        // Display "Past Due" tasks
-        if (pastDueTasks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showPastDueTasks = !showPastDueTasks }
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "${stringResource(R.string.past_due)} (${pastDueTasks.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showPastDueTasks) {
-                TaskList(
-                    taskList = pastDueTasks,
-                    onTaskClick = { onTaskClick(it.id) },
-                    onTaskDeleteClick = onTaskDeleteClick,
-                    onTaskCheckedChange = onTaskCheckedChange,
-                    contentPadding = contentPadding,
-                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-                )
-            }
-        }
+        TaskSection(
+            title = stringResource(R.string.past_due),
+            taskList = pastDueTasks,
+            isExpanded = showPastDueTasks,
+            onToggleExpand = { showPastDueTasks = !showPastDueTasks },
+            onTaskClick = onTaskClick,
+            onTaskCheckedChange = onTaskCheckedChange,
+            onTaskDeleteClick = onTaskDeleteClick,
+            contentPadding = contentPadding
+        )
 
-        // Display "No Due Date" tasks
-        if (noDueDateTasks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showNoDueDateTasks = !showNoDueDateTasks }
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "${stringResource(R.string.no_due_date)} (${noDueDateTasks.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showNoDueDateTasks) {
-                TaskList(
-                    taskList = noDueDateTasks,
-                    onTaskClick = { onTaskClick(it.id) },
-                    onTaskDeleteClick = onTaskDeleteClick,
-                    onTaskCheckedChange = onTaskCheckedChange,
-                    contentPadding = contentPadding,
-                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-                )
-            }
-        }
+        TaskSection(
+            title = stringResource(R.string.no_due_date),
+            taskList = noDueDateTasks,
+            isExpanded = showNoDueDateTasks,
+            onToggleExpand = { showNoDueDateTasks = !showNoDueDateTasks },
+            onTaskClick = onTaskClick,
+            onTaskCheckedChange = onTaskCheckedChange,
+            onTaskDeleteClick = onTaskDeleteClick,
+            contentPadding = contentPadding
+        )
 
-        // Display "Today" tasks
-        if (todayTasks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showTodayTasks = !showTodayTasks }
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "${stringResource(R.string.today)} (${todayTasks.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showTodayTasks) {
-                TaskList(
-                    taskList = todayTasks,
-                    onTaskClick = { onTaskClick(it.id) },
-                    onTaskDeleteClick = onTaskDeleteClick,
-                    onTaskCheckedChange = onTaskCheckedChange,
-                    contentPadding = contentPadding,
-                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-                )
-            }
-        }
+        TaskSection(
+            title = stringResource(R.string.today),
+            taskList = todayTasks,
+            isExpanded = showTodayTasks,
+            onToggleExpand = { showTodayTasks = !showTodayTasks },
+            onTaskClick = onTaskClick,
+            onTaskCheckedChange = onTaskCheckedChange,
+            onTaskDeleteClick = onTaskDeleteClick,
+            contentPadding = contentPadding
+        )
 
-        // Display "Tomorrow" tasks
-        if (tomorrowTasks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showTomorrowTasks = !showTomorrowTasks }
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "${stringResource(R.string.tomorrow)} (${tomorrowTasks.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showTomorrowTasks) {
-                TaskList(
-                    taskList = tomorrowTasks,
-                    onTaskClick = { onTaskClick(it.id) },
-                    onTaskDeleteClick = onTaskDeleteClick,
-                    onTaskCheckedChange = onTaskCheckedChange,
-                    contentPadding = contentPadding,
-                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-                )
-            }
-        }
+        TaskSection(
+            title = stringResource(R.string.tomorrow),
+            taskList = tomorrowTasks,
+            isExpanded = showTomorrowTasks,
+            onToggleExpand = { showTomorrowTasks = !showTomorrowTasks },
+            onTaskClick = onTaskClick,
+            onTaskCheckedChange = onTaskCheckedChange,
+            onTaskDeleteClick = onTaskDeleteClick,
+            contentPadding = contentPadding
+        )
 
-        // Display "Future" tasks
-        if (futureTasks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showFutureTasks = !showFutureTasks }
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "${stringResource(R.string.future)} (${futureTasks.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showFutureTasks) {
-                TaskList(
-                    taskList = futureTasks,
-                    onTaskClick = { onTaskClick(it.id) },
-                    onTaskDeleteClick = onTaskDeleteClick,
-                    onTaskCheckedChange = onTaskCheckedChange,
-                    contentPadding = contentPadding,
-                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
-                )
-            }
+        TaskSection(
+            title = stringResource(R.string.future),
+            taskList = futureTasks,
+            isExpanded = showFutureTasks,
+            onToggleExpand = { showFutureTasks = !showFutureTasks },
+            onTaskClick = onTaskClick,
+            onTaskCheckedChange = onTaskCheckedChange,
+            onTaskDeleteClick = onTaskDeleteClick,
+            contentPadding = contentPadding
+        )
+    }
+}
+
+@Composable
+fun TaskSection(
+    title: String,
+    taskList: List<Task>,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
+    onTaskClick: (Int) -> Unit,
+    onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onTaskDeleteClick: (Task) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    modifier: Modifier = Modifier
+) {
+    if (taskList.isNotEmpty()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggleExpand() }
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = "$title (${taskList.size})",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        if (isExpanded) {
+            TaskList(
+                taskList = taskList,
+                onTaskClick = { onTaskClick(it.id) },
+                onTaskDeleteClick = onTaskDeleteClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                contentPadding = contentPadding,
+                modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+            )
         }
     }
 }
