@@ -117,6 +117,7 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
+                    var selectedTab by remember { mutableStateOf("All") }
                     HomeTopAppBar(
                         categories = homeUiState.categoryList,
                         onCategoryClick = { category ->
@@ -125,8 +126,14 @@ fun HomeScreen(
                         },
                         onAllClick = {
                             selectedCategory.value = null
-                            homeViewModel.selectCategory(null) // Show all tasks
+                            selectedTab = "All"
+                            homeViewModel.selectCategory(null)
                         },
+                        onTodayClick = {
+                            selectedCategory.value = null
+                            selectedTab = "Today"
+                        },
+                        selectedTab = selectedTab,
                         onCategoryEntryClick = { showCategoryEntryModal.value = true },
                         selectedCategory = selectedCategory.value,
                         modifier = modifier
@@ -213,9 +220,11 @@ fun HomeScreen(
 private fun HomeTopAppBar(
     categories: List<Category>,
     onCategoryClick: (Category) -> Unit,
-    onAllClick: () -> Unit, // Special handler for the "All" option
+    onAllClick: () -> Unit,    // Handler for the "All" option
+    onTodayClick: () -> Unit,  // Handler for the "Today" option
     onCategoryEntryClick: () -> Unit,
     selectedCategory: Category?, // Pass the selected category
+    selectedTab: String,       // Track which special tab (All, Today, Notes) is selected
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -228,14 +237,27 @@ private fun HomeTopAppBar(
                 .align(Alignment.Center)
                 .fillMaxWidth()
         ) {
+            // "All" tab
             item {
-                val isSelected = selectedCategory == null // "All" is selected when no category is
+                val isSelected = selectedTab == "All" && selectedCategory == null
                 CategoryChip(
                     text = "All",
                     isSelected = isSelected,
                     onClick = onAllClick
                 )
             }
+
+            // "Today" tab
+            item {
+                val isSelected = selectedTab == "Today" && selectedCategory == null
+                CategoryChip(
+                    text = "Today",
+                    isSelected = isSelected,
+                    onClick = onTodayClick
+                )
+            }
+
+            // Existing categories
             items(categories) { category ->
                 val isSelected = selectedCategory == category
                 CategoryChip(
@@ -244,6 +266,8 @@ private fun HomeTopAppBar(
                     onClick = { onCategoryClick(category) }
                 )
             }
+
+            // Add Category chip
             item {
                 Box(
                     modifier = Modifier
@@ -530,7 +554,9 @@ private fun PreviewHomeTopAppBar() {
             // Handle add category click here
         },
         selectedCategory = null,
-        onAllClick = {}
+        onAllClick = {},
+        onTodayClick = {},
+        selectedTab = "All"
     )
 }
 
