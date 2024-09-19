@@ -92,7 +92,9 @@ fun TodoNavHost(
         composable(
             route = CategoryManageDestination.route
         ) {
-            CategoryManageScreen()
+            CategoryManageScreen(
+                onNavigateUp = { navController.navigateUp() }
+            )
         }
     }
 }
