@@ -448,7 +448,7 @@ private fun HomeBody(
         }
         item {
             Text(
-                text = "View all completed task",
+                text = "View completed task",
                 style = TextStyle(textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(top = dimensionResource(id = R.dimen.padding_medium))

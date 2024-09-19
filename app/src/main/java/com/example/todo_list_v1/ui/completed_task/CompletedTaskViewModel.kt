@@ -13,7 +13,7 @@ import java.util.Locale
 
 class CompletedTaskViewModel(
     private val completedTaskRepository: CompletedTaskRepository
-): ViewModel() {
+) : ViewModel() {
     private val _completedTasks = MutableStateFlow<List<CompletedTask>>(emptyList())
     val completedTasks: StateFlow<List<CompletedTask>> = _completedTasks
 
@@ -26,7 +26,7 @@ class CompletedTaskViewModel(
                         allTasks.sortedByDescending { it.completedAt }
                     } else {
                         allTasks
-                            .filter { it.taskCategory?.toIntOrNull() == categoryId }
+                            .filter { it.taskCategoryId == categoryId } // Use taskCategoryId for filtering
                             .sortedByDescending { it.completedAt }
                     }
                 }
