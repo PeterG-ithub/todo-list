@@ -48,8 +48,7 @@ fun CompletedTaskScreen(
     onNavigateUp: () -> Unit,
     viewModel: CompletedTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val completedTasks by viewModel.completedTasks.collectAsState(emptyList())
-    val groupedTasks = viewModel.getGroupedTasks()
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(categoryId) {
         viewModel.loadCompletedTasksByCategory(categoryId)
@@ -73,7 +72,7 @@ fun CompletedTaskScreen(
                 )
                 .fillMaxSize()
         ) {
-            if (completedTasks.isEmpty()) {
+            if (uiState.completedTasks.isEmpty()) {
                 Text(
                     text = stringResource(id = R.string.no_completed_tasks),
                     modifier = Modifier.align(Alignment.Center)
@@ -82,7 +81,7 @@ fun CompletedTaskScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    groupedTasks.forEach { (date, tasks) ->
+                    uiState.groupedTasks.forEach { (date, tasks) ->
                         item {
                             Box(
                                 modifier = Modifier
@@ -96,7 +95,7 @@ fun CompletedTaskScreen(
                                 )
                             }
                         }
-                        items(tasks) { completedTask ->
+                        items(tasks, key = { it.id }) { completedTask ->
                             CompletedTaskItem(
                                 completedTask = completedTask,
                                 onDelete = { task -> viewModel.deleteCompletedTask(task) },
@@ -109,6 +108,7 @@ fun CompletedTaskScreen(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

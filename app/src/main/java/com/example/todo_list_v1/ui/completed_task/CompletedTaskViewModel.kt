@@ -13,35 +13,43 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class CompletedTaskUiState(
+    val completedTasks: List<CompletedTask> = emptyList(),
+    val groupedTasks: Map<String, List<CompletedTask>> = emptyMap()
+)
+
 class CompletedTaskViewModel(
     private val completedTaskRepository: CompletedTaskRepository,
     private val tasksRepository: TasksRepository // Only if you need to restore tasks to the active list
 ) : ViewModel() {
-    private val _completedTasks = MutableStateFlow<List<CompletedTask>>(emptyList())
-    val completedTasks: StateFlow<List<CompletedTask>> = _completedTasks
+
+    private val _uiState = MutableStateFlow(CompletedTaskUiState())
+    val uiState: StateFlow<CompletedTaskUiState> = _uiState
+
+    init {
+        loadCompletedTasksByCategory(null)
+    }
 
     fun loadCompletedTasksByCategory(categoryId: Int?) {
         viewModelScope.launch {
             completedTaskRepository.getAllCompletedTasksStream()
                 .collect { allTasks ->
-                    _completedTasks.value = if (categoryId == null) {
-                        allTasks.sortedByDescending { it.completedAt }
-                    } else {
+                    val filteredTasks = if (categoryId == null) {
                         allTasks
-                            .filter { it.taskCategoryId == categoryId } // Use taskCategoryId for filtering
-                            .sortedByDescending { it.completedAt }
+                    } else {
+                        allTasks.filter { it.taskCategoryId == categoryId }
                     }
+                    val sortedTasks = filteredTasks.sortedByDescending { it.completedAt }
+                    _uiState.value = CompletedTaskUiState(
+                        completedTasks = sortedTasks,
+                        groupedTasks = sortedTasks.groupBy {
+                            val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
+                            dateFormat.format(Date(it.completedAt))
+                        }
+                    )
                 }
         }
     }
-
-    fun getGroupedTasks(): Map<String, List<CompletedTask>> {
-        return _completedTasks.value.groupBy {
-            val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
-            dateFormat.format(Date(it.completedAt))
-        }
-    }
-
     fun restoreTask(completedTask: CompletedTask) {
 
     }
