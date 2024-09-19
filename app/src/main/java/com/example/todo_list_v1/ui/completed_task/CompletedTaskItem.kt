@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,6 @@ import java.util.Locale
 
 @Composable
 fun CompletedTaskItem(completedTask: CompletedTask) {
-    // Format the completion time
     val dateFormat = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
     val formattedCompletionTime = dateFormat.format(Date(completedTask.completedAt))
 
@@ -71,9 +71,12 @@ fun CompletedTaskItem(completedTask: CompletedTask) {
                 Column {
                     Text(
                         text = completedTask.taskName,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            textDecoration = TextDecoration.LineThrough
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
                         modifier = Modifier.widthIn(max = 150.dp)
                     )
                     if (completedTask.taskDueDate != null) {

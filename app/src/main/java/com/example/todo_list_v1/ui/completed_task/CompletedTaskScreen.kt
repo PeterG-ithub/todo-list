@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.TodoTopAppBar
@@ -44,10 +47,9 @@ fun CompletedTaskScreen(
     onNavigateUp: () -> Unit,
     viewModel: CompletedTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    // Collect the state of completed tasks (ensure this is a List<CompletedTask>)
     val completedTasks by viewModel.completedTasks.collectAsState(emptyList())
+    val groupedTasks = viewModel.getGroupedTasks()
 
-    // Trigger the ViewModel to load tasks based on the categoryId
     LaunchedEffect(categoryId) {
         viewModel.loadCompletedTasksByCategory(categoryId)
     }
@@ -68,22 +70,34 @@ fun CompletedTaskScreen(
                     top = innerPadding.calculateTopPadding(),
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
-                .fillMaxSize() // Ensure the Box takes up the full screen space
+                .fillMaxSize()
         ) {
             if (completedTasks.isEmpty()) {
-                // Display a message if there are no completed tasks
                 Text(
                     text = stringResource(id = R.string.no_completed_tasks),
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                // Display the list of completed tasks inside a LazyColumn
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(completedTasks) { completedTask ->
-                        // Pass each CompletedTask to the CompletedTaskItem
-                        CompletedTaskItem(completedTask = completedTask)
+                    groupedTasks.forEach { (date, tasks) ->
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = date,
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                            }
+                        }
+                        items(tasks) { completedTask ->
+                            CompletedTaskItem(completedTask = completedTask)
+                        }
                     }
                 }
             }
