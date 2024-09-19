@@ -132,6 +132,7 @@ fun HomeScreen(
                         onTodayClick = {
                             selectedCategory.value = null
                             selectedTab = "Today"
+                            homeViewModel.showTodayTasks()
                         },
                         selectedTab = selectedTab,
                         onCategoryEntryClick = { showCategoryEntryModal.value = true },
