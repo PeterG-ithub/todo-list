@@ -1,6 +1,5 @@
-package com.example.todo_list_v1.ui.category
+package com.example.todo_list_v1.ui.category.item
 
-import android.opengl.Visibility
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
