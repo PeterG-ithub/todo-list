@@ -60,24 +60,26 @@ fun TaskItemCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.widthIn(max = 150.dp)
                 )
-                if (task.nextOccurrence != null) {
+                if (task.dueDate != null) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = convertMillisToDate(task.nextOccurrence),
+                            text = convertMillisToDate(task.dueDate),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
                         )
-
                         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_tiny)))
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.repeat),
+
+                        if (task.repeatFrequency != null) {
+                            Icon(
+                                painter = painterResource(
+                                    id = R.drawable.repeat),
                                 contentDescription = "Repeat Icon",
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
-                        )
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
+                            )
+                        }
                     }
                 }
             }
