@@ -8,6 +8,7 @@ import com.example.todo_list_v1.data.completed_task.CompletedTask
 import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
+import com.example.todo_list_v1.ui.task.entry.calculateNextOccurrence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -76,32 +77,44 @@ class HomeViewModel(
 
             if (isCompleted) {
                 val categoryName: String? = task.categoryId?.let { categoryId ->
-                    // Fetch the category details only if categoryId is not null
                     categoryRepository.getCategoryStream(categoryId)
                         .firstOrNull()?.name
                 }
                 val categoryId: Int? = task.categoryId
 
-                // Create a new CompletedTask from the completed Task
                 val completedTask = CompletedTask(
                     taskId = task.id,
                     taskName = task.name,
                     taskDescription = task.description,
                     taskDueDate = task.dueDate,
                     completedAt = System.currentTimeMillis(),
-                    taskCategoryId = categoryId, // Use the category ID
-                    taskCategory = categoryName // Use the category name
+                    taskCategoryId = categoryId,
+                    taskCategory = categoryName
                 )
                 completedTaskRepository.insertCompletedTask(completedTask)
             }
 
-            if (task.nextOccurrence == null) {
-                // If no next occurrence, delete the task
+            if (task.nextOccurrence != null) {
+                // Recalculate next occurrence for repeating tasks
+                val nextOccurrence = calculateNextOccurrence(
+                    selectedRepeatOption = task.repeatFrequency,
+                    repeatInterval = task.repeatInterval,
+                    repeatEndsAt = task.repeatEndsAt,
+                    repeatOnDays = task.repeatOnDays
+                )
+
+                // Update task with new occurrence and mark it as not completed
+                val updatedRecurringTask = task.copy(
+                    isCompleted = false, // Uncheck the task
+                    nextOccurrence = nextOccurrence,
+                    dueDate = nextOccurrence
+                )
+                tasksRepository.updateTask(updatedRecurringTask)
+            } else {
                 tasksRepository.deleteTask(updatedTask)
             }
         }
     }
-
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
