@@ -90,10 +90,11 @@ object HomeDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     navigateToTaskEntry: (Category?) -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
     navigateToCompletedTask: (Category?) -> Unit,
-    modifier: Modifier = Modifier,
+    navigateToManageCategory: () -> Unit = { },
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val homeUiState by homeViewModel.homeUiState.collectAsState()
@@ -155,7 +156,7 @@ fun HomeScreen(
                                     showCategoryEntryModal.value = true
                                 }
                                 "Manage" -> {
-                                    /* TODO: Maybe navigate to a new category screen */
+                                    navigateToManageCategory()
                                 }
                                 "Delete" -> {
                                     selectedCategory.value?.let { category ->
