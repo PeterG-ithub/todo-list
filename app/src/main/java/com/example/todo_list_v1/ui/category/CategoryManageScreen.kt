@@ -6,7 +6,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.todo_list_v1.R
+import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
+
+object CategoryManageDestination : NavigationDestination {
+    override val route = "category_manage"
+    override val titleRes = R.string.manage_categories
+}
 
 @Composable
 fun CategoryManageScreen(
