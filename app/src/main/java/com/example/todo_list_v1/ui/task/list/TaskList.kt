@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,23 +27,25 @@ fun TaskList(
     onTaskDeleteClick: (Task) -> Unit = { }
 ) {
     Column(
-        modifier = modifier
-            .padding()
+        modifier = modifier.padding()
     ) {
         taskList.forEach { task ->
-            TaskItem(
-                task = task,
-                onTaskCheckedChange = { isChecked ->
-                    onTaskCheckedChange(task, isChecked)
-                },
-                onDeleteClick = { onTaskDeleteClick(task) },
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_tiny))
-                    .clickable { onTaskClick(task) }
-            )
+            key(task.id) { // Use a unique key for each task to help Compose track state
+                TaskItem(
+                    task = task,
+                    onTaskCheckedChange = { isChecked ->
+                        onTaskCheckedChange(task, isChecked)
+                    },
+                    onDeleteClick = { onTaskDeleteClick(task) },
+                    modifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.padding_tiny))
+                        .clickable { onTaskClick(task) }
+                )
+            }
         }
     }
 }
+
 
 
 @Preview(showBackground = true)

@@ -62,13 +62,13 @@ fun TaskItemCard(
                     isChecked = checked
                     // Delay the task deletion or update action
                     scope.launch {
-                        delay(300L) // Delay for 500ms or any duration you want
-                        onTaskCheckedChange(checked)
+                        delay(300L)
 
                         if (task.nextOccurrence != null) {
                             delay(100L) // Optional delay before unchecking for recurring task
                             isChecked = false // Uncheck after updating recurring task
                         }
+                        onTaskCheckedChange(checked)
                     }
 
                 }
