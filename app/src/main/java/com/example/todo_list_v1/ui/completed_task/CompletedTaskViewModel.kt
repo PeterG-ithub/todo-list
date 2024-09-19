@@ -54,7 +54,7 @@ class CompletedTaskViewModel(
         viewModelScope.launch {
             // Create a new Task based on the details from CompletedTask
             val task = Task(
-                id = completedTask.taskId ?: 0, // Use the original task ID or auto-generate if necessary
+                id = 0,
                 name = completedTask.taskName,
                 description = completedTask.taskDescription,
                 isCompleted = false, // Set to false as it's being restored
