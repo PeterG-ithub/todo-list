@@ -454,7 +454,7 @@ fun RepeatSelectionModal(
                             } else null
 
                             val repeatEndsAt = convertDateToMillis(repeatEndsAtDate)
-                            val nextOccurrence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
+                            val nextOccurence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
                             if (taskDetails.dueDate == null ) {
                                 onValueChange(
                                     taskDetails.copy(
@@ -462,8 +462,8 @@ fun RepeatSelectionModal(
                                         repeatInterval = repeatInterval,
                                         repeatEndsAt = repeatEndsAt,
                                         repeatOnDays = selectedRepeatOnDays,
-                                        nextOccurrence = nextOccurrence,
-                                        dueDate = nextOccurrence
+                                        nextOccurrence = nextOccurence,
+                                        dueDate = nextOccurence
                                     )
                                 )
                             } else {
@@ -473,7 +473,7 @@ fun RepeatSelectionModal(
                                         repeatInterval = repeatInterval,
                                         repeatEndsAt = repeatEndsAt,
                                         repeatOnDays = selectedRepeatOnDays,
-                                        nextOccurrence = nextOccurrence,
+                                        nextOccurrence = nextOccurence,
                                     )
                                 )
                             }
