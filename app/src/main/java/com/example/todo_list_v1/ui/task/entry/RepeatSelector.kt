@@ -454,15 +454,29 @@ fun RepeatSelectionModal(
                             } else null
 
                             val repeatEndsAt = convertDateToMillis(repeatEndsAtDate)
-                            onValueChange(
-                                taskDetails.copy(
-                                    repeatFrequency = selectedRepeatOption, // This should now have the correct value
-                                    repeatInterval = repeatInterval,
-                                    repeatEndsAt = repeatEndsAt,
-                                    repeatOnDays = selectedRepeatOnDays,
-                                    nextOccurrence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
+                            val nextOccurrence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
+                            if (taskDetails.dueDate == null ) {
+                                onValueChange(
+                                    taskDetails.copy(
+                                        repeatFrequency = selectedRepeatOption, // This should now have the correct value
+                                        repeatInterval = repeatInterval,
+                                        repeatEndsAt = repeatEndsAt,
+                                        repeatOnDays = selectedRepeatOnDays,
+                                        nextOccurrence = nextOccurrence,
+                                        dueDate = nextOccurrence
+                                    )
                                 )
-                            )
+                            } else {
+                                onValueChange(
+                                    taskDetails.copy(
+                                        repeatFrequency = selectedRepeatOption, // This should now have the correct value
+                                        repeatInterval = repeatInterval,
+                                        repeatEndsAt = repeatEndsAt,
+                                        repeatOnDays = selectedRepeatOnDays,
+                                        nextOccurrence = nextOccurrence,
+                                    )
+                                )
+                            }
                         } else {
                             onValueChange(
                                 taskDetails.copy(
