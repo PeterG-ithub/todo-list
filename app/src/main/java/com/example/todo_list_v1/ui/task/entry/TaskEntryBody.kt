@@ -117,8 +117,11 @@ fun TaskEntryBody(
                 color = if (ifDateSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
             OutlinedTextField(
-                value = "Add Note",
-                onValueChange = { },
+                value = taskUiState.taskDetails.description ?: "",
+                placeholder = { Text("Add Note") }, // placeholder should be a composable
+                onValueChange = { note ->
+                    onTaskValueChange(taskUiState.taskDetails.copy(description = note))
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(196.dp)
