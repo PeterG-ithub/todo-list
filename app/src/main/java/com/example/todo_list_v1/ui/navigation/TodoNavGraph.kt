@@ -44,7 +44,7 @@ fun TodoNavHost(
                     navController.navigate("${CompletedTaskDestination.route}/${selectedCategory?.id}")
                 },
                 navigateToManageCategory = {
-                    navController.navigate("$CategoryManageDestination")
+                    navController.navigate(CategoryManageDestination.route)
                 }
             )
         }
@@ -93,10 +93,9 @@ fun TodoNavHost(
             route = CategoryManageDestination.route
         ) {
             CategoryManageScreen(
-                onNavigateUp = { navController.navigateUp() }
+                canNavigateBack = true,
+                onNavigateUp = { navController.popBackStack() }
             )
         }
     }
 }
-
-
