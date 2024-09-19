@@ -1,5 +1,7 @@
 package com.example.todo_list_v1.ui.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todo_list_v1.data.category.Category
@@ -19,6 +21,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 class HomeViewModel(
     private val tasksRepository: TasksRepository,
@@ -27,17 +32,35 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _selectedCategoryId = MutableStateFlow<Int?>(null) // Null means "All"
+    private val _showTodayTasks = MutableStateFlow(false) // New StateFlow for "Today" filter
 
     // StateFlow for the currently selected category ID
     val selectedCategoryId: StateFlow<Int?> = _selectedCategoryId
+    val showTodayTasks: StateFlow<Boolean> = _showTodayTasks
 
-    // Task list for the currently selected category or all tasks
+    // Task list for the currently selected category or all tasks, or tasks due today
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalCoroutinesApi::class)
-    val filteredTasks: StateFlow<List<Task>> = _selectedCategoryId.flatMapLatest { categoryId ->
-        if (categoryId == null) {
-            tasksRepository.getAllTasksStream()
-        } else {
-            tasksRepository.getTasksByCategoryStream(categoryId)
+    val filteredTasks: StateFlow<List<Task>> = combine(
+        _selectedCategoryId,
+        _showTodayTasks,
+        tasksRepository.getAllTasksStream()
+    ) { categoryId, showTodayTasks, allTasks ->
+        allTasks.filter { task ->
+            when {
+                showTodayTasks -> {
+                    task.dueDate?.let { dueDateMillis ->
+                        // Convert milliseconds to LocalDate
+                        val dueDate = Instant.ofEpochMilli(dueDateMillis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        // Check if dueDate is today
+                        dueDate == LocalDate.now()
+                    } ?: false
+                }
+                categoryId == null -> true
+                else -> task.categoryId == categoryId
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT_MILLIS), emptyList())
 
@@ -53,9 +76,16 @@ class HomeViewModel(
             initialValue = HomeUiState()
         )
 
-    // Update the selected category and trigger a new task fetch
+    // Update the selected category and clear "Today" filter
     fun selectCategory(categoryId: Int?) {
         _selectedCategoryId.value = categoryId
+        _showTodayTasks.value = false // Clear "Today" filter when category is selected
+    }
+
+    // Set the filter to show "Today" tasks and clear category filter
+    fun showTodayTasks() {
+        _showTodayTasks.value = true
+        _selectedCategoryId.value = null // Clear selected category when showing today’s tasks
     }
 
     fun deleteTask(task: Task) {
@@ -116,7 +146,6 @@ class HomeViewModel(
             }
         }
     }
-
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
