@@ -619,9 +619,14 @@ fun calculateNextOccurrence(
     selectedRepeatOption: String?,
     repeatInterval: Int?,
     repeatEndsAt: Long?,
-    repeatOnDays: List<Int>?
+    repeatOnDays: List<Int>?,
+    currentDueDate: Long? = null // Default parameter for current due date
 ): Long? {
     val calendar = Calendar.getInstance()
+
+    // If currentDueDate is provided, set the calendar to that date
+    // Otherwise, use the current date
+    calendar.timeInMillis = currentDueDate ?: System.currentTimeMillis()
 
     // Handle different repeat frequencies
     val nextOccurrence = when (selectedRepeatOption?.lowercase()) {

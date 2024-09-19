@@ -100,7 +100,8 @@ class HomeViewModel(
                     selectedRepeatOption = task.repeatFrequency,
                     repeatInterval = task.repeatInterval,
                     repeatEndsAt = task.repeatEndsAt,
-                    repeatOnDays = task.repeatOnDays
+                    repeatOnDays = task.repeatOnDays,
+                    currentDueDate = task.dueDate
                 )
 
                 // Update task with new occurrence and mark it as not completed
@@ -115,6 +116,7 @@ class HomeViewModel(
             }
         }
     }
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
