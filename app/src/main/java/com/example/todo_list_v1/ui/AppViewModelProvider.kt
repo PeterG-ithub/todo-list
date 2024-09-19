@@ -43,7 +43,8 @@ object AppViewModelProvider {
 
         initializer {
             CompletedTaskViewModel(
-                todoApplication().container.completedTaskRepository
+                todoApplication().container.completedTaskRepository,
+                todoApplication().container.tasksRepository
             )
         }
     }

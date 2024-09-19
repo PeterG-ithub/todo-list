@@ -28,6 +28,7 @@ import com.example.todo_list_v1.TodoTopAppBar
 import com.example.todo_list_v1.data.completed_task.CompletedTask
 import com.example.todo_list_v1.ui.AppViewModelProvider
 import com.example.todo_list_v1.ui.home.CompletedTaskRepositoryMock
+import com.example.todo_list_v1.ui.home.TasksRepositoryMock
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 
@@ -96,7 +97,11 @@ fun CompletedTaskScreen(
                             }
                         }
                         items(tasks) { completedTask ->
-                            CompletedTaskItem(completedTask = completedTask)
+                            CompletedTaskItem(
+                                completedTask = completedTask,
+                                onDelete = { task -> viewModel.deleteCompletedTask(task) },
+                                onUndo = { task -> viewModel.restoreTask(task) }
+                            )
                         }
                     }
                 }
@@ -114,26 +119,29 @@ fun CompletedTaskScreenPreview() {
             navigateBack = { /* Handle navigation back */ },
             onNavigateUp = { /* Handle navigate up */ },
             viewModel = CompletedTaskViewModel(
-                CompletedTaskRepositoryMock(listOf(
-                    CompletedTask(
-                        id = 1,
-                        taskId = 1,
-                        taskName = "Completed Task 1",
-                        taskDescription = "This is the first completed task.",
-                        taskCategory = "1", // Assuming category ID is represented as a String
-                        taskDueDate = null,
-                        completedAt = System.currentTimeMillis() - 3600000 // Example timestamp
-                    ),
-                    CompletedTask(
-                        id = 2,
-                        taskId = 2,
-                        taskName = "Completed Task 2",
-                        taskDescription = "This is the second completed task.",
-                        taskCategory = "2", // Assuming category ID is represented as a String
-                        taskDueDate = null,
-                        completedAt = System.currentTimeMillis() - 7200000 // Example timestamp
+                completedTaskRepository = CompletedTaskRepositoryMock(
+                    listOf(
+                        CompletedTask(
+                            id = 1,
+                            taskId = 1,
+                            taskName = "Completed Task 1",
+                            taskDescription = "This is the first completed task.",
+                            taskCategoryId = 1, // Assuming category ID is an Int
+                            taskDueDate = null,
+                            completedAt = System.currentTimeMillis() - 3600000 // Example timestamp
+                        ),
+                        CompletedTask(
+                            id = 2,
+                            taskId = 2,
+                            taskName = "Completed Task 2",
+                            taskDescription = "This is the second completed task.",
+                            taskCategoryId = 2, // Assuming category ID is an Int
+                            taskDueDate = null,
+                            completedAt = System.currentTimeMillis() - 7200000 // Example timestamp
+                        )
                     )
-                ))
+                ),
+                tasksRepository = TasksRepositoryMock()
             )
         )
     }

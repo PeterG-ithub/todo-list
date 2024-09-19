@@ -47,7 +47,11 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun CompletedTaskItem(completedTask: CompletedTask) {
+fun CompletedTaskItem(
+    completedTask: CompletedTask,
+    onUndo: (CompletedTask) -> Unit = { },
+    onDelete: (CompletedTask) -> Unit = { }
+) {
     val dateFormat = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
     val formattedCompletionTime = dateFormat.format(Date(completedTask.completedAt))
 
@@ -139,6 +143,7 @@ fun CompletedTaskItem(completedTask: CompletedTask) {
                             },
                             onClick = {
                                 // Handle Undo action
+                                onUndo(completedTask)
                                 expanded = false
                             }
                         )
@@ -162,6 +167,7 @@ fun CompletedTaskItem(completedTask: CompletedTask) {
                             },
                             onClick = {
                                 // Handle Delete action
+                                onDelete(completedTask)
                                 expanded = false
                             }
                         )
@@ -171,6 +177,7 @@ fun CompletedTaskItem(completedTask: CompletedTask) {
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
