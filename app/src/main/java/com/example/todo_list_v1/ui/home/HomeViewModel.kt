@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryRepository
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -18,7 +21,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val tasksRepository: TasksRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val completedTaskRepository: CompletedTaskRepository
 ) : ViewModel() {
 
     private val _selectedCategoryId = MutableStateFlow<Int?>(null) // Null means "All"
@@ -69,8 +73,35 @@ class HomeViewModel(
         viewModelScope.launch {
             val updatedTask = task.copy(isCompleted = isCompleted)
             tasksRepository.updateTask(updatedTask)
+
+            if (isCompleted) {
+                val categoryName: String? = task.categoryId?.let { categoryId ->
+                    // Fetch the category details only if categoryId is not null
+                    categoryRepository.getCategoryStream(categoryId)
+                        .firstOrNull()?.name
+                }
+                val categoryId: Int? = task.categoryId
+
+                // Create a new CompletedTask from the completed Task
+                val completedTask = CompletedTask(
+                    taskId = task.id,
+                    taskName = task.name,
+                    taskDescription = task.description,
+                    taskDueDate = task.dueDate,
+                    completedAt = System.currentTimeMillis(),
+                    taskCategoryId = categoryId, // Use the category ID
+                    taskCategory = categoryName // Use the category name
+                )
+                completedTaskRepository.insertCompletedTask(completedTask)
+            }
+
+            if (task.nextOccurrence == null) {
+                // If no next occurrence, delete the task
+                tasksRepository.deleteTask(updatedTask)
+            }
         }
     }
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

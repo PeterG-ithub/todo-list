@@ -1,6 +1,7 @@
 package com.example.todo_list_v1.ui.task.list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,10 +25,11 @@ fun TaskList(
     modifier: Modifier = Modifier,
     onTaskDeleteClick: (Task) -> Unit = { }
 ) {
-    LazyColumn(
-        modifier = modifier,
+    Column(
+        modifier = modifier
+            .padding()
     ) {
-        items(items = taskList, key = { it.id }) { task ->
+        taskList.forEach { task ->
             TaskItem(
                 task = task,
                 onTaskCheckedChange = { isChecked ->

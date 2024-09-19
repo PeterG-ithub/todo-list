@@ -51,7 +51,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -60,6 +62,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryRepository
+import com.example.todo_list_v1.data.completed_task.CompletedTask
+import com.example.todo_list_v1.data.completed_task.CompletedTaskRepository
 import com.example.todo_list_v1.data.task.Task
 import com.example.todo_list_v1.data.task.TasksRepository
 import com.example.todo_list_v1.ui.AppViewModelProvider
@@ -88,6 +92,7 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToTaskEntry: (Category?) -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
+    navigateToCompletedTask: (Category?) -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -192,8 +197,8 @@ fun HomeScreen(
             },
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
+            onViewCompletedTaskClick = { navigateToCompletedTask(selectedCategory.value) }
         )
-
         if (showCategoryEntryModal.value) {
             CategoryEntryModal(
                 onDismiss = { showCategoryEntryModal.value = false },
@@ -358,7 +363,8 @@ private fun HomeBody(
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onTaskDeleteClick: (Task) -> Unit = { }
+    onTaskDeleteClick: (Task) -> Unit = { },
+    onViewCompletedTaskClick: () -> Unit = { },
 ) {
     var showNoDueDateTasks by remember { mutableStateOf(true) }
     var showTodayTasks by remember { mutableStateOf(true) }
@@ -376,64 +382,79 @@ private fun HomeBody(
     val tomorrowTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it) } == tomorrow }
     val futureTasks = taskList.filter { it.dueDate?.let { millisToLocalDate(it).isAfter(tomorrow) } == true }
 
-    Column(
+    LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.padding(contentPadding)
     ) {
-        TaskSection(
-            title = stringResource(R.string.past_due),
-            taskList = pastDueTasks,
-            isExpanded = showPastDueTasks,
-            onToggleExpand = { showPastDueTasks = !showPastDueTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.no_due_date),
-            taskList = noDueDateTasks,
-            isExpanded = showNoDueDateTasks,
-            onToggleExpand = { showNoDueDateTasks = !showNoDueDateTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.today),
-            taskList = todayTasks,
-            isExpanded = showTodayTasks,
-            onToggleExpand = { showTodayTasks = !showTodayTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.tomorrow),
-            taskList = tomorrowTasks,
-            isExpanded = showTomorrowTasks,
-            onToggleExpand = { showTomorrowTasks = !showTomorrowTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
-
-        TaskSection(
-            title = stringResource(R.string.future),
-            taskList = futureTasks,
-            isExpanded = showFutureTasks,
-            onToggleExpand = { showFutureTasks = !showFutureTasks },
-            onTaskClick = onTaskClick,
-            onTaskCheckedChange = onTaskCheckedChange,
-            onTaskDeleteClick = onTaskDeleteClick,
-            contentPadding = contentPadding
-        )
+        item {
+            TaskSection(
+                title = stringResource(R.string.past_due),
+                taskList = pastDueTasks,
+                isExpanded = showPastDueTasks,
+                onToggleExpand = { showPastDueTasks = !showPastDueTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.no_due_date),
+                taskList = noDueDateTasks,
+                isExpanded = showNoDueDateTasks,
+                onToggleExpand = { showNoDueDateTasks = !showNoDueDateTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.today),
+                taskList = todayTasks,
+                isExpanded = showTodayTasks,
+                onToggleExpand = { showTodayTasks = !showTodayTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.tomorrow),
+                taskList = tomorrowTasks,
+                isExpanded = showTomorrowTasks,
+                onToggleExpand = { showTomorrowTasks = !showTomorrowTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            TaskSection(
+                title = stringResource(R.string.future),
+                taskList = futureTasks,
+                isExpanded = showFutureTasks,
+                onToggleExpand = { showFutureTasks = !showFutureTasks },
+                onTaskClick = onTaskClick,
+                onTaskCheckedChange = onTaskCheckedChange,
+                onTaskDeleteClick = onTaskDeleteClick,
+                contentPadding = contentPadding
+            )
+        }
+        item {
+            Text(
+                text = "View completed task",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .padding(top = dimensionResource(id = R.dimen.padding_medium))
+                    .clickable { onViewCompletedTaskClick() }
+            )
+        }
     }
 }
 
@@ -452,10 +473,12 @@ fun millisToLocalDate(millis: Long, zone: ZoneId = ZoneId.systemDefault()): Loca
 fun HomeScreenPreview_NoTasks() {
     HomeScreen(
         navigateToTaskEntry = {},
+        navigateToCompletedTask = {},
         navigateToTaskUpdate = {},
         homeViewModel = HomeViewModel(
             tasksRepository = TasksRepositoryMock(), // Replace with a mock or test repository
-            categoryRepository = CategoryRepositoryMock() // Replace with a mock or test repository
+            categoryRepository = CategoryRepositoryMock(), // Replace with a mock or test repository
+            completedTaskRepository = CompletedTaskRepositoryMock()
         )
     )
 }
@@ -467,6 +490,7 @@ fun HomeScreenPreview_WithTasks() {
     HomeScreen(
         navigateToTaskEntry = {},
         navigateToTaskUpdate = {},
+        navigateToCompletedTask = {},
         homeViewModel = HomeViewModel(
             tasksRepository = TasksRepositoryMock(listOf(
                 Task(id = 1, name = "Task 1", description = "Description 1", isCompleted = false),
@@ -475,7 +499,8 @@ fun HomeScreenPreview_WithTasks() {
             categoryRepository = CategoryRepositoryMock(listOf(
                 Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
                 Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
-            )) // Replace with a mock or test repository
+            )), // Replace with a mock or test repository
+            completedTaskRepository = CompletedTaskRepositoryMock()
         ),
     )
 }
@@ -582,5 +607,38 @@ class CategoryRepositoryMock(
             if (it.id == categoryId) it.copy(isArchived = true) else it
         }
         categoriesFlow.value = updatedList
+    }
+}
+
+class CompletedTaskRepositoryMock(
+    private val completedTasks: List<CompletedTask> = emptyList()
+) : CompletedTaskRepository {
+
+    private val completedTasksFlow = MutableStateFlow(completedTasks)
+
+    override fun getAllCompletedTasksStream(): Flow<List<CompletedTask>> = completedTasksFlow
+
+    override fun getCompletedTasksByTaskIdStream(taskId: Int): Flow<List<CompletedTask>> {
+        return completedTasksFlow.map { tasks -> tasks.filter { it.taskId == taskId } }
+    }
+
+    override fun getCompletedTaskStream(id: Int): Flow<CompletedTask?> {
+        return completedTasksFlow.map { tasks -> tasks.find { it.id == id } }
+    }
+
+    override suspend fun insertCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun updateCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun deleteCompletedTask(completedTask: CompletedTask) {
+        // Not implemented for mock
+    }
+
+    override suspend fun deleteAllCompletedTasks() {
+        // Not implemented for mock
     }
 }

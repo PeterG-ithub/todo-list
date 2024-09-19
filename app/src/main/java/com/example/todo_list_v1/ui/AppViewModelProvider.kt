@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.todo_list_v1.TodoApplication
 import com.example.todo_list_v1.ui.category.CategoryViewModel
+import com.example.todo_list_v1.ui.completed_task.CompletedTaskViewModel
 import com.example.todo_list_v1.ui.home.HomeViewModel
 import com.example.todo_list_v1.ui.task.TaskEditViewModel
 import com.example.todo_list_v1.ui.task.TaskEntryViewModel
@@ -16,7 +17,8 @@ object AppViewModelProvider {
         initializer {
             HomeViewModel(
                 todoApplication().container.tasksRepository,
-                todoApplication().container.categoryRepository
+                todoApplication().container.categoryRepository,
+                todoApplication().container.completedTaskRepository
             )
         }
 
@@ -36,6 +38,13 @@ object AppViewModelProvider {
         initializer {
             CategoryViewModel(
                 todoApplication().container.categoryRepository
+            )
+        }
+
+        initializer {
+            CompletedTaskViewModel(
+                todoApplication().container.completedTaskRepository,
+                todoApplication().container.tasksRepository
             )
         }
     }

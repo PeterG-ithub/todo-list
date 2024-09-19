@@ -19,4 +19,6 @@
     <string name="tomorrow">Tomorrow</string>
     <string name="future">Future</string>
     <string name="past_due">Past</string>
+    <string name="completed_task_title">Completed Tasks</string>
+    <string name="no_completed_tasks">No completed task</string>
 </resources>
