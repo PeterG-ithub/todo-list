@@ -80,7 +80,7 @@ fun TaskItemCard(
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = 150.dp)
+                    modifier = Modifier.widthIn(max = 225.dp)
                 )
                 if (task.dueDate != null) {
                     Row(
