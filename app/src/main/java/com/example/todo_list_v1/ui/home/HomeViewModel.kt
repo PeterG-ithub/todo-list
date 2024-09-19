@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -74,13 +75,22 @@ class HomeViewModel(
             tasksRepository.updateTask(updatedTask)
 
             if (isCompleted) {
+                val categoryName: String? = task.categoryId?.let { categoryId ->
+                    // Fetch the category details only if categoryId is not null
+                    categoryRepository.getCategoryStream(categoryId)
+                        .firstOrNull()?.name
+                }
+                val categoryId: Int? = task.categoryId
+
                 // Create a new CompletedTask from the completed Task
                 val completedTask = CompletedTask(
                     taskId = task.id,
                     taskName = task.name,
                     taskDescription = task.description,
                     taskDueDate = task.dueDate,
-                    completedAt = System.currentTimeMillis()
+                    completedAt = System.currentTimeMillis(),
+                    taskCategoryId = categoryId, // Use the category ID
+                    taskCategory = categoryName // Use the category name
                 )
                 completedTaskRepository.insertCompletedTask(completedTask)
             }
@@ -91,6 +101,7 @@ class HomeViewModel(
             }
         }
     }
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
