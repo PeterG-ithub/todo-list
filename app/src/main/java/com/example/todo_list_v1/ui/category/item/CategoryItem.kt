@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,8 @@ fun CategoryItem(
     modifier: Modifier = Modifier,
     category: Category,
     visible: Boolean = true,
+    onVisibilityClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
@@ -37,7 +40,7 @@ fun CategoryItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(id = R.dimen.padding_medium)),
+                .padding(dimensionResource(id = R.dimen.padding_tiny)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -45,21 +48,24 @@ fun CategoryItem(
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = 225.dp)
+                modifier = Modifier
+                    .padding(start = dimensionResource(id = R.dimen.padding_small))
+                    .widthIn(max = 225.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = if(visible) painterResource(id = R.drawable.visible_on) else painterResource(
-                    id = R.drawable.visible_off
-                ) ,
-                contentDescription = "Visible On"
-            )
-            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete Category",
-                tint = MaterialTheme.colorScheme.error
-            )
+            IconButton(onClick = onVisibilityClick) {
+                Icon(
+                    painter = if (visible) painterResource(id = R.drawable.visible_on) else painterResource(id = R.drawable.visible_off),
+                    contentDescription = "Toggle Visibility"
+                )
+            }
+            IconButton(onClick = onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Category",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
