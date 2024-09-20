@@ -601,6 +601,8 @@ class CategoryRepositoryMock(
 
     override fun getAllCategoriesStream(): Flow<List<Category>> = categoriesFlow
 
+    fun fetchAllCategories(): Flow<List<Category>> = categoriesFlow
+
     override fun getCategoryStream(id: Int): Flow<Category?> {
         return categoriesFlow.map { categories ->
             categories.find { it.id == id }
@@ -608,7 +610,6 @@ class CategoryRepositoryMock(
     }
 
     override suspend fun insertCategory(category: Category) {
-        // Add category to the list and update flow
         val updatedList = categoriesFlow.value.toMutableList().apply {
             add(category)
         }
@@ -616,7 +617,6 @@ class CategoryRepositoryMock(
     }
 
     override suspend fun updateCategory(category: Category) {
-        // Update category in the list and update flow
         val updatedList = categoriesFlow.value.map {
             if (it.id == category.id) category else it
         }
@@ -624,13 +624,11 @@ class CategoryRepositoryMock(
     }
 
     override suspend fun deleteCategory(category: Category) {
-        // Remove category from the list and update flow
         val updatedList = categoriesFlow.value.filter { it.id != category.id }
         categoriesFlow.value = updatedList
     }
 
     override suspend fun archiveCategory(categoryId: Int) {
-        // Archive category by updating its state and update flow
         val updatedList = categoriesFlow.value.map {
             if (it.id == categoryId) it.copy(isArchived = true) else it
         }

@@ -9,12 +9,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.TodoTopAppBar
+import com.example.todo_list_v1.data.category.Category
+import com.example.todo_list_v1.ui.AppViewModelProvider
+import com.example.todo_list_v1.ui.category.list.CategoryList
+import com.example.todo_list_v1.ui.completed_task.CompletedTaskViewModel
+import com.example.todo_list_v1.ui.home.CategoryRepositoryMock
 import com.example.todo_list_v1.ui.navigation.NavigationDestination
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
 
@@ -28,7 +37,13 @@ object CategoryManageDestination : NavigationDestination {
 fun CategoryManageScreen(
     canNavigateBack: Boolean = true,
     onNavigateUp: () -> Unit,
+    viewModel: CategoryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
+    // Trigger fetching of categories on first render
+    LaunchedEffect(Unit) {
+        viewModel.fetchAllCategories()
+    }
+
     Scaffold(
         topBar = {
             TodoTopAppBar(
@@ -47,12 +62,23 @@ fun CategoryManageScreen(
                 )
                 .fillMaxSize()
         ) {
-            Text(
-                "Hello world"
-            )
+            // Observe categories from the ViewModel
+            val categories by viewModel.allCategories.collectAsState()
+
+            // Check if the list is not empty and display it
+            if (categories.isNotEmpty()) {
+                CategoryList(
+                    categories = categories,
+                    onCategoryClick = { /* Handle click */ },
+                    onDeleteClick = { /* Handle delete */ },
+                    onVisibilityClick = { /* Handle visibility */ }
+                )
+            } else {
+                // Show a message when there are no categories
+                Text(text = "No categories available")
+            }
         }
     }
-
 }
 
 @Preview(showBackground = true)
@@ -61,7 +87,13 @@ fun CategoryManageScreenPreview(
 ) {
     Todolistv1Theme {
         CategoryManageScreen(
-            onNavigateUp = { }
+            onNavigateUp = { },
+            viewModel = CategoryViewModel(
+                categoryRepository = CategoryRepositoryMock(listOf(
+                    Category(id = 1, name = "Work", description = "Work tasks", color = "#FF5733"),
+                    Category(id = 2, name = "Personal", description = "Personal tasks", color = "#33FF57")
+                )),
+            )
         )
     }
 }
