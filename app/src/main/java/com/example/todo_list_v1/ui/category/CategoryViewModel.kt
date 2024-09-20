@@ -37,9 +37,13 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
 
     suspend fun saveCategory() {
         if (validateInput()) {
-            categoryRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
+            val existingCategories = _allCategories.value
+            val newOrder = (existingCategories.maxOfOrNull { it.order } ?: 0) + 1
+            val categoryDetails = categoryUiState.categoryDetails.toCategory().copy(order = newOrder)
+            categoryRepository.insertCategory(categoryDetails)
         }
     }
+
 
     suspend fun updateCategory() {
         if (validateInput()) {
