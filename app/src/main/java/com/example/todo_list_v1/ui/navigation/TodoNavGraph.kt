@@ -7,6 +7,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.todo_list_v1.ui.category.CategoryManageDestination
+import com.example.todo_list_v1.ui.category.CategoryManageScreen
 import com.example.todo_list_v1.ui.completed_task.CompletedTaskDestination
 import com.example.todo_list_v1.ui.completed_task.CompletedTaskScreen
 import com.example.todo_list_v1.ui.home.HomeDestination
@@ -41,6 +43,9 @@ fun TodoNavHost(
 
                     navController.navigate("${CompletedTaskDestination.route}/${selectedCategory?.id}")
                 },
+                navigateToManageCategory = {
+                    navController.navigate(CategoryManageDestination.route)
+                }
             )
         }
         composable(
@@ -84,7 +89,13 @@ fun TodoNavHost(
                 onNavigateUp = { navController.navigateUp() },
             )
         }
+        composable(
+            route = CategoryManageDestination.route
+        ) {
+            CategoryManageScreen(
+                canNavigateBack = true,
+                onNavigateUp = { navController.popBackStack() }
+            )
+        }
     }
 }
-
-

@@ -68,7 +68,8 @@ class HomeViewModel(
         filteredTasks,
         categoryRepository.getAllCategoriesStream()
     ) { tasks, categories ->
-        HomeUiState(taskList = tasks, categoryList = categories)
+        val visibleCategories = categories.filter { it.isVisible }.sortedBy { it.order }
+        HomeUiState(taskList = tasks, categoryList = visibleCategories)
     }
         .stateIn(
             scope = viewModelScope,
@@ -151,8 +152,6 @@ class HomeViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 }
-
-
 
 /**
  * UI State for HomeScreen

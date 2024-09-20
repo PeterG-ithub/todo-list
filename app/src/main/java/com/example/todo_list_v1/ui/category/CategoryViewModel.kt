@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.data.category.CategoryRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
@@ -15,14 +18,14 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         private set
 
     // State to hold all categories
-    var allCategories by mutableStateOf<List<Category>>(emptyList())
-        private set
+    private val _allCategories = MutableStateFlow<List<Category>>(emptyList())
+    val allCategories: StateFlow<List<Category>> = _allCategories.asStateFlow()
 
     // Method to fetch all categories
     fun fetchAllCategories() {
         viewModelScope.launch {
             categoryRepository.getAllCategoriesStream().collect { categories ->
-                allCategories = categories
+                _allCategories.value = categories.sortedBy { it.order } // Sort by order
             }
         }
     }
@@ -34,7 +37,10 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
 
     suspend fun saveCategory() {
         if (validateInput()) {
-            categoryRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
+            val existingCategories = _allCategories.value
+            val newOrder = (existingCategories.maxOfOrNull { it.order } ?: 0) + 1
+            val categoryDetails = categoryUiState.categoryDetails.toCategory().copy(order = newOrder)
+            categoryRepository.insertCategory(categoryDetails)
         }
     }
 
@@ -44,9 +50,28 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
-    suspend fun deleteCategory() {
-        categoryUiState.categoryDetails.id?.let {
-            categoryRepository.deleteCategory(categoryUiState.categoryDetails.toCategory())
+    fun toggleCategoryVisibility(category: Category) {
+        val updatedCategory = category.copy(isVisible = !category.isVisible)
+        viewModelScope.launch {
+            categoryRepository.updateCategory(updatedCategory) // Assuming updateCategory updates the DB
+        }
+    }
+
+    fun deleteCategory(category: Category) {
+        viewModelScope.launch {
+            categoryRepository.deleteCategory(category)
+            reorderCategories(category)
+        }
+    }
+
+    private suspend fun reorderCategories(deletedCategory: Category) {
+        val existingCategories = _allCategories.value
+            .filter { it.id != deletedCategory.id } // Exclude the deleted category
+            .sortedBy { it.order } // Sort by current order
+
+        existingCategories.forEachIndexed { index, category ->
+            // Update the order of each category
+            categoryRepository.updateCategory(category.copy(order = index + 1))
         }
     }
 
@@ -63,7 +88,7 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     private fun isNameUnique(name: String): Boolean {
-        // Check if the name is unique by comparing it against the list of all categories
-        return allCategories.none { it.name.equals(name, ignoreCase = true) }
+        // Access the current value of allCategories to check uniqueness
+        return allCategories.value.none { it.name.equals(name, ignoreCase = true) }
     }
 }
