@@ -13,5 +13,7 @@ data class Category(
     val icon: String? = null, // An icon resource for the category (e.g., a file name or URI)
     val createdDate: Long = System.currentTimeMillis(), // Timestamp when category was created
     val lastUpdated: Long = System.currentTimeMillis(), // Timestamp when it was last updated
-    val isArchived: Boolean = false // Archive flag to hide the category without deleting
+    val isArchived: Boolean = false, // Archive flag to hide the category without deleting
+    val order: Int = 0, // Order of the category for display
+    val isVisible: Boolean = true // Visibility flag to track if the category is visible
 )
