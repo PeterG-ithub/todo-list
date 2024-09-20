@@ -93,16 +93,32 @@ fun DatePickerModal(
         confirmButton = {
             TextButton(onClick = {
                 // Debugging logs
-                //println("Selected millis: ${datePickerState.selectedDateMillis}")
+                val selectedMillis = datePickerState.selectedDateMillis
+                println("Selected millis (UTC): $selectedMillis")
 
-                // Convert to Date and log
+                // Adjust the selected millis to local midnight
                 val calendar = Calendar.getInstance().apply {
-                    timeInMillis = datePickerState.selectedDateMillis ?: 0
-                }
-                val formatter = SimpleDateFormat("EEE, MMM dd", Locale.getDefault())
-                //println("Formatted date: ${formatter.format(calendar.time)}")
+                    // Set to UTC time first, using the millis from DatePicker
+                    timeZone = TimeZone.getTimeZone("UTC")
+                    timeInMillis = selectedMillis ?: 0
 
-                onDateSelected(datePickerState.selectedDateMillis)
+                    // Adjust to the user's local timezone
+                    timeZone = TimeZone.getDefault()
+
+                    // Reset to local midnight if you want the date to start at 00:00 in local time
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                // Log the date as local time
+                val formatter = SimpleDateFormat("EEE, MMM dd", Locale.getDefault())
+                formatter.timeZone = TimeZone.getDefault()
+                println("Formatted date (Local Time): ${formatter.format(calendar.time)}")
+                println("Selected millis (Local time): ${calendar.timeInMillis}")
+                // Send back local midnight millis
+                onDateSelected(calendar.timeInMillis)
                 onDismiss()
             }) {
                 Text("DONE")
