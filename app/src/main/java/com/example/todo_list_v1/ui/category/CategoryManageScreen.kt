@@ -70,7 +70,9 @@ fun CategoryManageScreen(
                 CategoryList(
                     categories = categories,
                     onCategoryClick = { /* Handle click */ },
-                    onDeleteClick = { /* Handle delete */ },
+                    onDeleteClick = { category ->
+                        viewModel.deleteCategory(category)
+                    },
                     onVisibilityClick = { /* Handle visibility */ }
                 )
             } else {

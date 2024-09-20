@@ -25,7 +25,7 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     fun fetchAllCategories() {
         viewModelScope.launch {
             categoryRepository.getAllCategoriesStream().collect { categories ->
-                _allCategories.value = categories
+                _allCategories.value = categories.sortedBy { it.order } // Sort by order
             }
         }
     }
@@ -44,7 +44,6 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
-
     suspend fun updateCategory() {
         if (validateInput()) {
             categoryRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
@@ -54,6 +53,18 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     fun deleteCategory(category: Category) {
         viewModelScope.launch {
             categoryRepository.deleteCategory(category)
+            reorderCategories(category)
+        }
+    }
+
+    private suspend fun reorderCategories(deletedCategory: Category) {
+        val existingCategories = _allCategories.value
+            .filter { it.id != deletedCategory.id } // Exclude the deleted category
+            .sortedBy { it.order } // Sort by current order
+
+        existingCategories.forEachIndexed { index, category ->
+            // Update the order of each category
+            categoryRepository.updateCategory(category.copy(order = index + 1))
         }
     }
 
