@@ -30,9 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.data.task.Task
-import com.example.todo_list_v1.ui.task.entry.convertMillisToDate
-import com.example.todo_list_v1.ui.task.entry.convertMillisToDates
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
+import com.example.todo_list_v1.util.DateUtils.convertMillisToDate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

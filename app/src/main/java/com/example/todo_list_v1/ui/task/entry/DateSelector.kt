@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.todo_list_v1.data.category.Category
 import com.example.todo_list_v1.ui.task.TaskDetails
+import com.example.todo_list_v1.util.DateUtils.convertMillisToDate
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -56,28 +57,6 @@ fun DateSelector(
             }
         }
     )
-}
-
-fun convertMillisToDate(millis: Long?): String {
-    return if (millis != null) {
-        // Create a Calendar instance and set the time in milliseconds
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = millis
-            // Adjust the time to the start of the day in the specified timezone
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            timeZone = TimeZone.getTimeZone("America/Los_Angeles")
-        }
-
-        // Format the date using SimpleDateFormat
-        val formatter = SimpleDateFormat("EEE, MMM dd", Locale.getDefault())
-        formatter.timeZone = TimeZone.getTimeZone("America/Los_Angeles")
-        formatter.format(calendar.time)
-    } else {
-        "Invalid date"
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

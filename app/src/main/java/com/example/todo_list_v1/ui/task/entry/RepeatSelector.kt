@@ -53,6 +53,9 @@ import androidx.compose.ui.window.Popup
 import com.example.todo_list_v1.R
 import com.example.todo_list_v1.ui.task.TaskDetails
 import com.example.todo_list_v1.ui.theme.Todolistv1Theme
+import com.example.todo_list_v1.util.DateUtils.calculateNextOccurrence
+import com.example.todo_list_v1.util.DateUtils.convertDateToMillis
+import com.example.todo_list_v1.util.DateUtils.convertMillisToDate
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -151,7 +154,7 @@ fun RepeatSelectionModal(
     var showRepeatEveryDropdown by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    var repeatEndsAtDate by remember { mutableStateOf(convertMillisToDates(taskDetails.repeatEndsAt)) }
+    var repeatEndsAtDate by remember { mutableStateOf(convertMillisToDate(taskDetails.repeatEndsAt)) }
 
     var selectedRepeatEveryOption = when (selectedRepeatOption) {
         "Daily" -> "${taskDetails.repeatInterval ?: 1} day${if (taskDetails.repeatInterval != 1) "s" else ""}"
@@ -450,15 +453,16 @@ fun RepeatSelectionModal(
                                 toggleDayState.filter { it.value }
                                     .keys
                                     .map { day -> days.indexOf(day) }
-                                    .sorted() // Sort indices in ascending order
+                                    .sorted()
                             } else null
 
                             val repeatEndsAt = convertDateToMillis(repeatEndsAtDate)
-                            val nextOccurence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays)
+                            val currentDueDate = taskDetails.dueDate ?: System.currentTimeMillis()
+                            val nextOccurence = calculateNextOccurrence(selectedRepeatOption, repeatInterval, repeatEndsAt, repeatOnDays, currentDueDate)
                             if (taskDetails.dueDate == null ) {
                                 onValueChange(
                                     taskDetails.copy(
-                                        repeatFrequency = selectedRepeatOption, // This should now have the correct value
+                                        repeatFrequency = selectedRepeatOption,
                                         repeatInterval = repeatInterval,
                                         repeatEndsAt = repeatEndsAt,
                                         repeatOnDays = selectedRepeatOnDays,
@@ -569,7 +573,7 @@ fun RepeatEndsAtModal(
         confirmButton = {
             TextButton(onClick = {
 
-                onDateSelected(convertMillisToDates(datePickerState.selectedDateMillis))
+                onDateSelected(convertMillisToDate(datePickerState.selectedDateMillis))
                 onDismissRequest()
             }) {
                 Text("DONE")
@@ -611,96 +615,6 @@ fun RepeatEndsAtModal(
         )
     }
 }
-
-
-fun convertMillisToDates(millis: Long?): String {
-    return if (millis != null) {
-        val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        return formatter.format(Date(millis))
-    } else {
-        "Never"
-    }
-}
-fun convertDateToMillis(date: String): Long? {
-    if (date == "Never") {
-        return null
-    }
-    val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    return formatter.parse(date)?.time ?: System.currentTimeMillis() // Return current time if parsing fails
-}
-
-fun calculateNextOccurrence(
-    selectedRepeatOption: String?,
-    repeatInterval: Int?,
-    repeatEndsAt: Long?,
-    repeatOnDays: List<Int>?,
-    currentDueDate: Long? = null // Default parameter for current due date
-): Long? {
-    val calendar = Calendar.getInstance()
-
-    // If currentDueDate is provided, set the calendar to that date
-    // Otherwise, use the current date
-    calendar.timeInMillis = currentDueDate ?: System.currentTimeMillis()
-
-    // Handle different repeat frequencies
-    val nextOccurrence = when (selectedRepeatOption?.lowercase()) {
-        "daily" -> calculateNextDailyOccurrence(calendar, repeatInterval ?: 1)
-        "weekly" -> calculateNextWeeklyOccurrence(calendar, repeatInterval ?: 1, repeatOnDays)
-        "monthly" -> calculateNextMonthlyOccurrence(calendar, repeatInterval ?: 1)
-        "yearly" -> calculateNextYearlyOccurrence(calendar, repeatInterval ?: 1)
-        else -> null
-    }
-
-    // If the next occurrence exceeds repeatEndsAt, return null
-    if (repeatEndsAt != null && nextOccurrence != null && nextOccurrence > repeatEndsAt) {
-        return null
-    }
-
-    return nextOccurrence
-}
-
-fun calculateNextDailyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
-    // Move the calendar forward by the interval in days
-    calendar.add(Calendar.DAY_OF_YEAR, repeatInterval)
-    return calendar.timeInMillis
-}
-
-fun calculateNextWeeklyOccurrence(calendar: Calendar, repeatInterval: Int, repeatOnDays: List<Int>?): Long {
-    if (repeatOnDays.isNullOrEmpty()) {
-        // If no specific days are selected, default to moving forward by weeks
-        calendar.add(Calendar.WEEK_OF_YEAR, repeatInterval)
-    } else {
-        // Move forward to the next valid day in repeatOnDays
-        val currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1 // Calendar.DAY_OF_WEEK starts from 1 (Sunday)
-        val sortedDays = repeatOnDays.sorted()
-
-        // Find the next day in the list after the current day
-        val nextDay = sortedDays.firstOrNull { it > currentDay } ?: sortedDays.first()
-
-        // Calculate days until the next occurrence
-        val daysToAdd = if (nextDay > currentDay) {
-            nextDay - currentDay
-        } else {
-            (7 - currentDay) + nextDay
-        }
-
-        calendar.add(Calendar.DAY_OF_YEAR, daysToAdd)
-    }
-    return calendar.timeInMillis
-}
-
-fun calculateNextMonthlyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
-    // Move the calendar forward by the interval in months
-    calendar.add(Calendar.MONTH, repeatInterval)
-    return calendar.timeInMillis
-}
-
-fun calculateNextYearlyOccurrence(calendar: Calendar, repeatInterval: Int): Long {
-    // Move the calendar forward by the interval in years
-    calendar.add(Calendar.YEAR, repeatInterval)
-    return calendar.timeInMillis
-}
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
