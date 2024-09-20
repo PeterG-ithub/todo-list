@@ -24,7 +24,7 @@ fun CategoryList(
         items(categories) { category ->
             CategoryItem(
                 category = category,
-                visible = true,
+                visible = category.isVisible,
                 modifier = Modifier
                     .clickable { onCategoryClick(category) }
                     .padding(

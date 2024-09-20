@@ -68,7 +68,8 @@ class HomeViewModel(
         filteredTasks,
         categoryRepository.getAllCategoriesStream()
     ) { tasks, categories ->
-        HomeUiState(taskList = tasks, categoryList = categories.sortedBy { it.order }) // Sort categories by order
+        val visibleCategories = categories.filter { it.isVisible }.sortedBy { it.order }
+        HomeUiState(taskList = tasks, categoryList = visibleCategories)
     }
         .stateIn(
             scope = viewModelScope,

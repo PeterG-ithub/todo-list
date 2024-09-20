@@ -73,7 +73,7 @@ fun CategoryManageScreen(
                     onDeleteClick = { category ->
                         viewModel.deleteCategory(category)
                     },
-                    onVisibilityClick = { /* Handle visibility */ }
+                    onVisibilityClick = { category -> viewModel.toggleCategoryVisibility(category) }
                 )
             } else {
                 // Show a message when there are no categories

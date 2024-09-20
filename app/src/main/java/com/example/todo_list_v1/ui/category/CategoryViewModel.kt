@@ -50,6 +50,13 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
+    fun toggleCategoryVisibility(category: Category) {
+        val updatedCategory = category.copy(isVisible = !category.isVisible)
+        viewModelScope.launch {
+            categoryRepository.updateCategory(updatedCategory) // Assuming updateCategory updates the DB
+        }
+    }
+
     fun deleteCategory(category: Category) {
         viewModelScope.launch {
             categoryRepository.deleteCategory(category)
